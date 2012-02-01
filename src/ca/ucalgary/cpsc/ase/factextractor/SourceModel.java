@@ -28,67 +28,139 @@ public class SourceModel {
 		invocations = new Stack<Invocation>();
 	}
 	
-	public static synchronized SourceModel getInstance() {
+	private static synchronized SourceModel getInstance() {
 		if (instance == null) {
 			instance = new SourceModel();
 		}
 		return instance;
 	}
 	
-	public Project getProject() {
+	private Project getProject() {
 		return project;
 	}
 	
-	public void setProject(Project project) {
+	private void setProject(Project project) {
 		this.project = project;
 	}
 	
-	public SourceFile getSourceFile() {
+	private SourceFile getSourceFile() {
 		return sourceFile;
 	}
 	
-	public void setSourceFile(SourceFile sourceFile) {
+	private void setSourceFile(SourceFile sourceFile) {
 		this.sourceFile = sourceFile;
 	}
 
-	public Clazz popTestClazz() {
+	private Clazz popTestClazz() {
 		return testClazzStack.pop();
 	}
 
-	public void pushTestClazz(Clazz testClazz) {
+	private void pushTestClazz(Clazz testClazz) {
 		testClazzStack.push(testClazz);
 	}
 	
-	public Clazz peekTestClazz() {
+	private Clazz peekTestClazz() {
 		return testClazzStack.peek();
 	}
 
-	public TestMethod getTestMethod() {
+	private TestMethod getTestMethod() {
 		return testMethod;
 	}
 
-	public void setTestMethod(TestMethod testMethod) {
+	private void setTestMethod(TestMethod testMethod) {
 		this.testMethod = testMethod;
 	}
 	
-	public Invocation popInvocation() {
+	private Invocation popInvocation() {
 		return invocations.pop();
 	}
 	
-	public void pushInvocation(Invocation invocation) {
+	private void pushInvocation(Invocation invocation) {
 		invocations.push(invocation);
 	}
 		
-	public Invocation peekInvocation() {
+	private Invocation peekInvocation() {
 		return invocations.peek();
 	}
 
-	public Assertion getAssertion() {
+	private Assertion getAssertion() {
 		return assertion;
 	}
 
-	public void setAssertion(Assertion assertion) {
+	private void setAssertion(Assertion assertion) {
 		this.assertion = assertion;
 	}
-		
+	
+	public static Project currentProject() {
+		return getInstance().getProject();
+	}
+	
+	public static void stepIntoProject(Project project) {
+		getInstance().setProject(project);
+	}
+	
+	public static SourceFile currentSourceFile() {
+		return getInstance().getSourceFile();
+	}
+	
+	public static void stepIntoSourceFile(SourceFile source) {
+		getInstance().setSourceFile(source);
+	}
+	
+	public static void stepIntoClazz(Clazz clazz) {
+		getInstance().pushTestClazz(clazz);
+	}
+	
+	public static void ignoreClazz() {
+		stepIntoClazz(null);
+	}
+	
+	public static Clazz stepOutOfClazz() {
+		return getInstance().popTestClazz();
+	}
+	
+	public static Clazz currentClazz() {
+		return getInstance().peekTestClazz();
+	}
+	
+	public static void stepIntoTestMethod(TestMethod method) {
+		getInstance().setTestMethod(method);
+	}
+	
+	public static void stepOutOfTestMethod() {
+		getInstance().setTestMethod(null);
+	}
+	
+	public static TestMethod currentTestMethod() {
+		return getInstance().getTestMethod();
+	}
+	
+	public static void stepIntoAssertion(Assertion assertion) {
+		getInstance().setAssertion(assertion);
+	}
+	
+	public static void stepOutOfAssertion() {
+		stepIntoAssertion(null);
+	}
+	
+	public static Assertion currentAssertion() {
+		return getInstance().getAssertion();
+	}
+	
+	public static Invocation currentInvocation() {
+		return getInstance().peekInvocation();
+	}
+	
+	public static void stepIntoInvocation(Invocation invocation) {
+		getInstance().pushInvocation(invocation);
+	}
+	
+	public static void ignoreInvocation() {
+		stepIntoInvocation(null);
+	}
+	
+	public static Invocation stepOutOfInvocation() {
+		return getInstance().popInvocation();
+	}
+	
 }

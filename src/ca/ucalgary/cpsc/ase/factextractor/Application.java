@@ -39,8 +39,9 @@ public class Application implements IApplication {
 					String projectVersion = null;
 					ProjectService projectService = new ProjectService();
 					Project prj = projectService.create(projectName, projectVersion);
-					SourceModel.getInstance().setProject(prj);
+					SourceModel.stepIntoProject(prj);
 					logger.debug("Project: " + projectName);
+					
 					IPackageFragment[] packages = JavaCore.create(project)
 							.getPackageFragments();
 					// parse(JavaCore.create(project));
@@ -51,9 +52,10 @@ public class Application implements IApplication {
 								// Now create the AST for the ICompilationUnits
 								SourceFileService sourceService = new SourceFileService();
 								String path = unit.getPath().toString();
-								SourceFile source = sourceService.create(SourceModel.getInstance().getProject(), path);
-								SourceModel.getInstance().setSourceFile(source);
+								SourceFile source = sourceService.create(SourceModel.currentProject(), path);
+								SourceModel.stepIntoSourceFile(source);
 								logger.debug("File: " + path);
+								
 								CompilationUnit parse = parse(unit);
 								TestVisitor visitor = new TestVisitor();
 								parse.accept(visitor);
