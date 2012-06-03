@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
@@ -29,9 +30,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Invocation;
-import ca.ucalgary.cpsc.ase.FactManager.entity.TestMethod;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
-import ca.ucalgary.cpsc.ase.FactManager.service.TestMethodService;
 
 public class TestVisitor extends ASTVisitor {
 	
@@ -183,6 +182,41 @@ public class TestVisitor extends ASTVisitor {
 		if (invocation instanceof Assertion) { // turn off the assertion flag
 			SourceModel.stepOutOfAssertion();			
 		}
+		super.endVisit(node);
+	}		
+
+	@Override
+	public boolean visit(ClassInstanceCreation node) {
+		try {
+			if (SourceModel.currentTestMethod() != null) { // if inside a JUnit test method
+				IMethodBinding binding = node.resolveConstructorBinding();
+				if (binding != null) {
+					Assertion assertion = SourceModel.currentAssertion();
+					List<Expression> arguments = node.arguments();				
+					ASTHelper.saveMethodCall(binding, arguments, assertion);
+					logger.debug("Constructor invocation in test method.");
+				}
+				else { // method call cannot be resolved, ignore it
+					SourceModel.ignoreInvocation();
+					logger.warn("ConstructorInvocation node binding was not resolved.");
+					return false;								
+				}				
+			}
+			else { // constructor call is happening outside any test method, ignore it
+				//todo - test helper methods and attribute initializations have to be covered
+				SourceModel.ignoreInvocation();
+				logger.debug("Constructor invocation outside test method was ignored.");
+				return false;
+			}			
+		} catch (Throwable t) {
+			logger.warn(t.getMessage());
+		}
+		return super.visit(node);
+	}
+
+	@Override
+	public void endVisit(ClassInstanceCreation node) {
+		Invocation invocation = SourceModel.stepOutOfInvocation();
 		super.endVisit(node);
 	}
 
