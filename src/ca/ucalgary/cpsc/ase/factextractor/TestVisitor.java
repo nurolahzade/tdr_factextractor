@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
@@ -22,6 +23,8 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -54,27 +57,27 @@ public class TestVisitor extends ASTVisitor {
 						}
 						if (ASTHelper.isJunit4TestClass(binding)) { // if it is a JUnit 4.x class
 							ASTHelper.saveTestClazz(binding, ObjectType.JUNIT4);
-							logger.debug("This is a junit 4 test class.");
+							logger.debug("This is a junit 4 test class: " + binding.getQualifiedName());
 							return super.visit(node);
 						}
 						else { // not a JUnit 3.x or 4.x test class, ignore it
 							SourceModel.ignoreClazz();
-							logger.debug("This is not a junit test class.");
+							logger.debug("This is not a junit test class: " + binding.getQualifiedName());
 						}
 					}
 					else { // inner class, ignore it
 						SourceModel.ignoreClazz();
-						logger.debug("Ignoring inner class; junit does not run test methods in inner classes.");					
+						logger.debug("Ignoring inner class; junit does not run test methods in inner classes: " + binding.getQualifiedName());					
 					}
 				}					
 				else { // binding is not resolved, ignore it
 					SourceModel.ignoreClazz();
-					logger.warn("TypeDeclaration node binding was not resolved.");
+					logger.warn("TypeDeclaration node binding was not resolved: " + node.getName().getFullyQualifiedName());
 				}
 			}
 			else { // interface, ignore it
 				SourceModel.ignoreClazz();
-				logger.debug("Ignoring interface definition.");				
+				logger.debug("Ignoring interface definition: " + node.getName().getFullyQualifiedName());				
 			}
 		} catch (Throwable t) {
 			logger.warn(t.getMessage());
@@ -100,27 +103,30 @@ public class TestVisitor extends ASTVisitor {
 						//todo - only public void methods are test methods, others are just helpers
 						isTestMethod = true;
 						ASTHelper.saveTestMethod(binding);
-						logger.debug("This is a junit 3 test method.");					
+						logger.debug("This is a junit 3 test method: " + binding.getName());					
 					}	
 					else if (testClazz.getType() == ObjectType.JUNIT4) { // if inside a JUnit 4.z test class						
 						for (IAnnotationBinding annotation : binding.getAnnotations()) {						
 							if ("org.junit.Test".equals(annotation.getAnnotationType().getQualifiedName())) { // if method is marked with @Test
 								isTestMethod = true;
 								ASTHelper.saveTestMethod(binding);
-								logger.debug("This is a junit 4 test method.");											
+								logger.debug("This is a junit 4 test method: " + binding.getName());											
 								for (IMemberValuePairBinding valuePair : annotation.getDeclaredMemberValuePairs()) {
 									if ("expected".equals(valuePair.getName())) { // if JUnit 4.x test method expects an exception to be thrown
 										ASTHelper.saveXceotion((ITypeBinding)valuePair.getValue());
-										logger.debug("Test method expects exception.");
+										logger.debug("Test method expects exception: " + binding.getName());
 									}
 								}
 							}					
 						}
 					}
+					else {
+						logger.debug("Non-test method declaration was ignored: " + binding.getName());
+					}
 				}
 				else { // method binding cannot be resolved, ignore it
 					SourceModel.stepIntoTestMethod(null);
-					logger.warn("MethodDeclaration node binding was not resolved.");
+					logger.warn("MethodDeclaration node binding was not resolved: " + node.getName().getFullyQualifiedName());
 					return false;													
 				}
 			}
@@ -135,39 +141,18 @@ public class TestVisitor extends ASTVisitor {
 		SourceModel.stepOutOfTestMethod();
 		super.endVisit(node);
 	}
-
+		
 	@Override
 	public boolean visit(MethodInvocation node) {
 		try {
 			if (SourceModel.currentTestMethod() != null) { // if inside a JUnit test method
 				IMethodBinding binding = node.resolveMethodBinding();
-				if (binding != null) {
-					Assertion assertion = SourceModel.currentAssertion();
-					List<Expression> arguments = node.arguments();				
-					if ("junit.framework.Assert".equals(binding.getDeclaringClass().getQualifiedName())) { // if this is an Assert method call
-						if (assertion != null) { // nested assertions are not allowed
-							logger.error("New assertion reached while assertion flag is on.");
-						}
-						else { // legitimate assertion
-							assertion = ASTHelper.saveAssertion(binding);
-							logger.debug("Assertion in test method.");
-						}
-					}
-					else { // this is a non-Assert method call (may or may not have an assertion on it)
-						ASTHelper.saveMethodCall(binding, arguments, assertion);
-						logger.debug("Method invocation in test method.");
-					}				
-				}
-				else { // method call cannot be resolved, ignore it
-					SourceModel.ignoreInvocation();
-					logger.warn("MethodInvocation node binding was not resolved.");
-					return false;								
-				}				
+				ASTHelper.visit(binding, node.arguments());
 			}
 			else { // method call is happening outside any test method, ignore it
 				//todo - test helper method have to be covered
 				SourceModel.ignoreInvocation();
-				logger.debug("Method invocation outside test method was ignored.");
+				logger.debug("Method invocation outside test method was ignored: " + node.getName().getFullyQualifiedName());
 				return false;
 			}
 		} catch (Throwable t) {
@@ -186,6 +171,31 @@ public class TestVisitor extends ASTVisitor {
 	}		
 
 	@Override
+	public boolean visit(SuperMethodInvocation node) {
+		try {			
+			if (SourceModel.currentTestMethod() != null) { // if inside a JUnit test method
+				IMethodBinding binding = node.resolveMethodBinding();
+				ASTHelper.visit(binding, node.arguments());
+			}
+			else { // method call is happening outside any test method, ignore it
+				//todo - test helper method have to be covered
+				SourceModel.ignoreInvocation();
+				logger.debug("Super method invocation outside test method was ignored: " + node.getName().getFullyQualifiedName());
+				return false;
+			}
+		} catch (Throwable t) {
+			logger.warn(t.getMessage());
+		}
+		return super.visit(node);
+	}
+
+	@Override
+	public void endVisit(SuperMethodInvocation node) {
+		SourceModel.stepOutOfTestMethod();
+		super.endVisit(node);
+	}
+
+	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		try {
 			if (SourceModel.currentTestMethod() != null) { // if inside a JUnit test method
@@ -194,7 +204,7 @@ public class TestVisitor extends ASTVisitor {
 					Assertion assertion = SourceModel.currentAssertion();
 					List<Expression> arguments = node.arguments();				
 					ASTHelper.saveMethodCall(binding, arguments, assertion);
-					logger.debug("Constructor invocation in test method.");
+					logger.debug("Constructor invocation in test method: " + binding.getName());
 				}
 				else { // method call cannot be resolved, ignore it
 					SourceModel.ignoreInvocation();
@@ -225,29 +235,30 @@ public class TestVisitor extends ASTVisitor {
 		try {
 			if (SourceModel.currentTestMethod() != null) { // if inside a test method
 				IVariableBinding binding = node.resolveFieldBinding();
-				if (binding != null) {
-					ITypeBinding fieldType = binding.getType(); 
-					ITypeBinding declaringClass = binding.getDeclaringClass();
-					String fieldName = binding.getName();
-					if (declaringClass != null || fieldType.isPrimitive() || fieldType.isArray()) { // if is a primitive or array, or a property of a known class
-						//todo add assertion on field access tracking
-						ASTHelper.saveReference(fieldName, fieldType, declaringClass);
-						logger.debug("Field access in test method.");								
-					}
-					else 
-						if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
-							logger.warn("FieldAccess declaring class binding was not resolved: " + fieldName);
-						}					
-				}
-				else { // cannot resolve field access, ignore it
-					logger.warn("FieldAccess node binding was not resolved.");
-					return false;				
-				}				
+				return ASTHelper.visit(binding);
 			}
 			else { // field was accessed outside a test method, ignore it
 				//todo - if it is used for initializing a field that is later used in a test method, then we should not ignore it
 				//todo - test helper methods have to be covered
-				logger.debug("Field access outside test method was ignored.");
+				logger.debug("Field access outside test method was ignored: " + node.getName().getFullyQualifiedName());
+			}
+		} catch (Throwable t) {
+			logger.warn(t.getMessage());
+		}
+		return super.visit(node);
+	}
+
+	@Override
+	public boolean visit(SuperFieldAccess node) {
+		try {
+			if (SourceModel.currentTestMethod() != null) { // if inside a test method
+				IVariableBinding binding = node.resolveFieldBinding();
+				return ASTHelper.visit(binding);
+			}
+			else { // field was accessed outside a test method, ignore it
+				//todo - if it is used for initializing a field that is later used in a test method, then we should not ignore it
+				//todo - test helper methods have to be covered
+				logger.debug("Field access outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
 			logger.warn(t.getMessage());
@@ -270,7 +281,7 @@ public class TestVisitor extends ASTVisitor {
 							if (declaringClass != null || nameType.isPrimitive() || nameType.isArray()) { // if is primitive, array, or a property of a known class
 								//todo add assertion on field access tracking
 								ASTHelper.saveReference(fieldName, nameType, declaringClass);
-								logger.debug("Qualified name access in test method.");											
+								logger.debug("Qualified name access in test method: " + fieldName);											
 							}
 							else
 								if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
@@ -280,14 +291,14 @@ public class TestVisitor extends ASTVisitor {
 					}				
 				}
 				else { // cannot resolve qualified name, ignore it
-					logger.warn("QualifiedName node binding was not resolved.");
+					logger.warn("QualifiedName node binding was not resolved: " + node.getName().getFullyQualifiedName());
 					return false;
 				}				
 			}
 			else { // qualified name was accessed outside a test method, ignore it
 				//todo - if it is used for initializing a field that is later used in a test method, then we should not ignore it
 				//todo - test helper methods have to be covered
-				logger.debug("Qualified name access outside test method was ignored.");
+				logger.debug("Qualified name access outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
 			logger.warn(t.getMessage());
@@ -306,16 +317,16 @@ public class TestVisitor extends ASTVisitor {
 					ITypeBinding variableType = binding.getType();
 					ITypeBinding declaringClass = binding.getDeclaringClass();
 					ASTHelper.saveReference(variableName, variableType, declaringClass);
-					logger.debug("Variable declaration in test method.");
+					logger.debug("Variable declaration in test method: " + binding.getName());
 				}
 				else { // cannot resolve variable declaration, ignore it
-					logger.warn("VariableDeclarationFragment node binding was not resolved.");
+					logger.warn("VariableDeclarationFragment node binding was not resolved: " + node.getName().getFullyQualifiedName());
 				}				
 			}
 			else { // variable declaration is happening outside a test method, ignore it
 				//todo - if this field is used in the test cases and is initialized here, then we should not ignore it
 				//todo - test helper methods have to be covered
-				logger.debug("Variable declaration fragment outside test method was ignored.");
+				logger.debug("Variable declaration fragment outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
 			logger.warn(t.getMessage());						
@@ -323,6 +334,18 @@ public class TestVisitor extends ASTVisitor {
 		return super.visit(node);
 	}
 		
+	@Override
+	public boolean visit(ArrayAccess node) {
+		// TODO Auto-generated method stub
+		return super.visit(node);
+	}
+
+	@Override
+	public void endVisit(ArrayAccess node) {
+		// TODO Auto-generated method stub
+		super.endVisit(node);
+	}
+
 	@Override
 	public boolean visit(CatchClause node) {
 		try {

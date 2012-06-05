@@ -5,8 +5,10 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -88,6 +90,55 @@ public class ASTHelper {
 			}
 		}
 		return false;
+	}
+	
+	public static boolean visit(IVariableBinding binding) {
+		if (binding != null) {
+			ITypeBinding fieldType = binding.getType(); 
+			ITypeBinding declaringClass = binding.getDeclaringClass();
+			String fieldName = binding.getName();
+			if (declaringClass != null || fieldType.isPrimitive() || fieldType.isArray()) { // if is a primitive or array, or a property of a known class
+				//todo add assertion on field access tracking
+				ASTHelper.saveReference(fieldName, fieldType, declaringClass);
+				logger.debug("Field access in test method.");
+			}
+			else {				
+				if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
+					logger.warn("FieldAccess declaring class binding was not resolved: " + fieldName);
+					return false;
+				}					
+			}
+		}
+		else { // cannot resolve field access, ignore it
+			logger.warn("FieldAccess node binding was not resolved.");
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean visit(IMethodBinding binding, List<Expression> arguments) {
+		if (binding != null) {
+			Assertion assertion = SourceModel.currentAssertion();
+			if ("junit.framework.Assert".equals(binding.getDeclaringClass().getQualifiedName())) { // if this is an Assert method call
+				if (assertion != null) { // nested assertions are not allowed
+					logger.error("New assertion reached while assertion flag is on.");
+				}
+				else { // legitimate assertion
+					assertion = ASTHelper.saveAssertion(binding);
+					logger.debug("Assertion in test method.");
+				}
+			}
+			else { // this is a non-Assert method call (may or may not have an assertion on it)
+				ASTHelper.saveMethodCall(binding, arguments, assertion);
+				logger.debug("Method invocation in test method.");
+			}				
+		}
+		else { // method call cannot be resolved, ignore it
+			SourceModel.ignoreInvocation();
+			logger.warn("MethodInvocation node binding was not resolved.");
+			return false;								
+		}
+		return true;
 	}
 	
 	/*
