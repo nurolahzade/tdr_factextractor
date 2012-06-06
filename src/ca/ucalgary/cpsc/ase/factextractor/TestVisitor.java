@@ -236,7 +236,7 @@ public class TestVisitor extends ASTVisitor {
 		try {
 			if (SourceModel.currentTestMethod() != null) { // if inside a test method
 				IVariableBinding binding = node.resolveFieldBinding();
-				return ASTHelper.visit(binding);
+				return ASTHelper.visit(binding, true);
 			}
 			else { // field was accessed outside a test method, ignore it
 				//todo - if it is used for initializing a field that is later used in a test method, then we should not ignore it
@@ -254,7 +254,7 @@ public class TestVisitor extends ASTVisitor {
 		try {
 			if (SourceModel.currentTestMethod() != null) { // if inside a test method
 				IVariableBinding binding = node.resolveFieldBinding();
-				return ASTHelper.visit(binding);
+				return ASTHelper.visit(binding, true);
 			}
 			else { // field was accessed outside a test method, ignore it
 				//todo - if it is used for initializing a field that is later used in a test method, then we should not ignore it
@@ -275,7 +275,7 @@ public class TestVisitor extends ASTVisitor {
 				if (binding != null) {
 					if (binding.getKind() == IBinding.VARIABLE) { // if it is a local variable 
 						IVariableBinding variableBinding = (IVariableBinding) binding;
-						ASTHelper.visit(variableBinding);
+						ASTHelper.visit(variableBinding, false);
 					}				
 				}
 				else { // cannot resolve simple name, ignore it
@@ -303,7 +303,7 @@ public class TestVisitor extends ASTVisitor {
 				if (binding != null) {
 					if (binding.getKind() == IBinding.VARIABLE) { // if it is a field or local variable 
 						IVariableBinding variableBinding = (IVariableBinding) binding;
-						ASTHelper.visit(variableBinding);
+						ASTHelper.visit(variableBinding, false);
 					}				
 				}
 				else { // cannot resolve qualified name, ignore it

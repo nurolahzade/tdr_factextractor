@@ -92,7 +92,7 @@ public class ASTHelper {
 		return false;
 	}
 	
-	public static boolean visit(IVariableBinding binding) {
+	public static boolean visit(IVariableBinding binding, boolean isField) {
 		if (binding != null) {
 			ITypeBinding referenceType = binding.getType(); 
 			ITypeBinding declaringClass = binding.getDeclaringClass();
@@ -103,8 +103,8 @@ public class ASTHelper {
 				logger.debug("Reference access in test method: " + binding.getName());
 			}
 			else {				
-				if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
-					logger.warn("Reference declaring class binding was not resolved: " + referenceName);
+				if (isField && declaringClass == null) { // it is an object field but we don't know the class it belongs to, ignore it
+					logger.warn("Field declaring class binding was not resolved: " + referenceName);
 					return false;
 				}					
 			}
