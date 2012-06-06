@@ -304,20 +304,6 @@ public class TestVisitor extends ASTVisitor {
 					if (binding.getKind() == IBinding.VARIABLE) { // if it is a field or local variable 
 						IVariableBinding variableBinding = (IVariableBinding) binding;
 						ASTHelper.visit(variableBinding);
-//						if (variableBinding.isField()) { // if it is a field access 
-//							String fieldName = binding.getName();
-//							ITypeBinding nameType = variableBinding.getType();
-//							ITypeBinding declaringClass = ((IVariableBinding)binding).getDeclaringClass();
-//							if (declaringClass != null || nameType.isPrimitive() || nameType.isArray()) { // if is primitive, array, or a property of a known class
-//								//todo add assertion on field access tracking
-//								ASTHelper.saveReference(fieldName, nameType, declaringClass);
-//								logger.debug("Qualified name access in test method: " + fieldName);											
-//							}
-//							else
-//								if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
-//									logger.warn("QualifiedName declaring class binding was not resolved: " + fieldName);
-//								}
-//						}
 					}				
 				}
 				else { // cannot resolve qualified name, ignore it
@@ -364,18 +350,6 @@ public class TestVisitor extends ASTVisitor {
 		return super.visit(node);
 	}
 		
-	@Override
-	public boolean visit(ArrayAccess node) {
-		// TODO Auto-generated method stub
-		return super.visit(node);
-	}
-
-	@Override
-	public void endVisit(ArrayAccess node) {
-		// TODO Auto-generated method stub
-		super.endVisit(node);
-	}
-
 	@Override
 	public boolean visit(CatchClause node) {
 		try {

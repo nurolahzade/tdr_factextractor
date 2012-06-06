@@ -94,17 +94,17 @@ public class ASTHelper {
 	
 	public static boolean visit(IVariableBinding binding) {
 		if (binding != null) {
-			ITypeBinding fieldType = binding.getType(); 
+			ITypeBinding referenceType = binding.getType(); 
 			ITypeBinding declaringClass = binding.getDeclaringClass();
-			String fieldName = binding.getName();
-			if (declaringClass != null || fieldType.isPrimitive() || fieldType.isArray()) { // if is a primitive or array, or a property of a known class
+			String referenceName = binding.getName();
+			if (declaringClass != null || referenceType.isPrimitive() || referenceType.isArray()) { // if is a primitive or array, or a property of a known class
 				//todo add assertion on field access tracking
-				ASTHelper.saveReference(fieldName, fieldType, declaringClass);
+				ASTHelper.saveReference(referenceName, referenceType, declaringClass);
 				logger.debug("Reference access in test method: " + binding.getName());
 			}
 			else {				
 				if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
-					logger.warn("Reference declaring class binding was not resolved: " + fieldName);
+					logger.warn("Reference declaring class binding was not resolved: " + referenceName);
 					return false;
 				}					
 			}
@@ -116,22 +116,6 @@ public class ASTHelper {
 		return true;
 	}
 	
-//	public static void visit(IVariableBinding binding) {
-//		String variableName = binding.getName();
-//		ITypeBinding nameType = binding.getType();
-//		ITypeBinding declaringClass = ((IVariableBinding)binding).getDeclaringClass();
-//		if (declaringClass != null || nameType.isPrimitive() || nameType.isArray()) { // if is primitive, array, or a property of a known class
-//			//todo add assertion on field access tracking
-//			ASTHelper.saveReference(variableName, nameType, declaringClass);
-//			logger.debug("Variable access in test method: " + variableName);											
-//		}
-//		else {
-//			if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
-//				logger.warn("Variable declaring class binding was not resolved: " + variableName);
-//			}				
-//		}
-//	}
-		
 	public static boolean visit(IMethodBinding binding, List<Expression> arguments) {
 		if (binding != null) {
 			Assertion assertion = SourceModel.currentAssertion();
