@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -264,6 +265,34 @@ public class TestVisitor extends ASTVisitor {
 			logger.warn(t.getMessage());
 		}
 		return super.visit(node);
+	}	
+	
+	@Override
+	public boolean visit(SimpleName node) {
+		try {
+			if (SourceModel.currentTestMethod() != null) { // if inside a test method
+				IBinding binding = node.resolveBinding();
+				if (binding != null) {
+					if (binding.getKind() == IBinding.VARIABLE) { // if it is a local variable 
+						IVariableBinding variableBinding = (IVariableBinding) binding;
+						ASTHelper.visit(variableBinding);
+					}				
+				}
+				else { // cannot resolve simple name, ignore it
+					logger.warn("SimpleName node binding was not resolved: " + node.getFullyQualifiedName());
+					return false;
+				}				
+			}
+			else { // simple name was accessed outside a test method, ignore it
+				//todo - if it is used for initializing a field that is later used in a test method, then we should not ignore it
+				//todo - test helper methods have to be covered
+				logger.debug("Variable access outside test method was ignored: " + node.getFullyQualifiedName());
+			}
+		} catch (Throwable t) {
+			logger.warn(t.getMessage());
+		}
+		
+		return super.visit(node);
 	}
 
 	@Override
@@ -273,21 +302,22 @@ public class TestVisitor extends ASTVisitor {
 				IBinding binding = node.resolveBinding();
 				if (binding != null) {
 					if (binding.getKind() == IBinding.VARIABLE) { // if it is a field or local variable 
-						IVariableBinding variableBinding = (IVariableBinding) binding;  
-						if (variableBinding.isField()) { // if it is a field access 
-							String fieldName = binding.getName();
-							ITypeBinding nameType = variableBinding.getType();
-							ITypeBinding declaringClass = ((IVariableBinding)binding).getDeclaringClass();
-							if (declaringClass != null || nameType.isPrimitive() || nameType.isArray()) { // if is primitive, array, or a property of a known class
-								//todo add assertion on field access tracking
-								ASTHelper.saveReference(fieldName, nameType, declaringClass);
-								logger.debug("Qualified name access in test method: " + fieldName);											
-							}
-							else
-								if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
-									logger.warn("QualifiedName declaring class binding was not resolved: " + fieldName);
-								}
-						}
+						IVariableBinding variableBinding = (IVariableBinding) binding;
+						ASTHelper.visit(variableBinding);
+//						if (variableBinding.isField()) { // if it is a field access 
+//							String fieldName = binding.getName();
+//							ITypeBinding nameType = variableBinding.getType();
+//							ITypeBinding declaringClass = ((IVariableBinding)binding).getDeclaringClass();
+//							if (declaringClass != null || nameType.isPrimitive() || nameType.isArray()) { // if is primitive, array, or a property of a known class
+//								//todo add assertion on field access tracking
+//								ASTHelper.saveReference(fieldName, nameType, declaringClass);
+//								logger.debug("Qualified name access in test method: " + fieldName);											
+//							}
+//							else
+//								if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
+//									logger.warn("QualifiedName declaring class binding was not resolved: " + fieldName);
+//								}
+//						}
 					}				
 				}
 				else { // cannot resolve qualified name, ignore it

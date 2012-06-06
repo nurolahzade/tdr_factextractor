@@ -100,22 +100,38 @@ public class ASTHelper {
 			if (declaringClass != null || fieldType.isPrimitive() || fieldType.isArray()) { // if is a primitive or array, or a property of a known class
 				//todo add assertion on field access tracking
 				ASTHelper.saveReference(fieldName, fieldType, declaringClass);
-				logger.debug("Field access in test method.");
+				logger.debug("Reference access in test method: " + binding.getName());
 			}
 			else {				
 				if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
-					logger.warn("FieldAccess declaring class binding was not resolved: " + fieldName);
+					logger.warn("Reference declaring class binding was not resolved: " + fieldName);
 					return false;
 				}					
 			}
 		}
 		else { // cannot resolve field access, ignore it
-			logger.warn("FieldAccess node binding was not resolved.");
+			logger.warn("IVariableBinding node binding was not resolved.");
 			return false;
 		}
 		return true;
 	}
 	
+//	public static void visit(IVariableBinding binding) {
+//		String variableName = binding.getName();
+//		ITypeBinding nameType = binding.getType();
+//		ITypeBinding declaringClass = ((IVariableBinding)binding).getDeclaringClass();
+//		if (declaringClass != null || nameType.isPrimitive() || nameType.isArray()) { // if is primitive, array, or a property of a known class
+//			//todo add assertion on field access tracking
+//			ASTHelper.saveReference(variableName, nameType, declaringClass);
+//			logger.debug("Variable access in test method: " + variableName);											
+//		}
+//		else {
+//			if (declaringClass == null) { // it is an object but we don't know the class it belongs to, ignore it
+//				logger.warn("Variable declaring class binding was not resolved: " + variableName);
+//			}				
+//		}
+//	}
+		
 	public static boolean visit(IMethodBinding binding, List<Expression> arguments) {
 		if (binding != null) {
 			Assertion assertion = SourceModel.currentAssertion();
