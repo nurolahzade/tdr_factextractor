@@ -114,7 +114,7 @@ public class TestVisitor extends ASTVisitor {
 								logger.debug("This is a junit 4 test method: " + binding.getName());											
 								for (IMemberValuePairBinding valuePair : annotation.getDeclaredMemberValuePairs()) {
 									if ("expected".equals(valuePair.getName())) { // if JUnit 4.x test method expects an exception to be thrown
-										ASTHelper.saveXceotion((ITypeBinding)valuePair.getValue());
+										ASTHelper.saveXception((ITypeBinding)valuePair.getValue());
 										logger.debug("Test method expects exception: " + binding.getName());
 									}
 								}
@@ -356,7 +356,7 @@ public class TestVisitor extends ASTVisitor {
 			if (SourceModel.currentTestMethod() != null) { // if inside a test method
 				IVariableBinding binding = node.getException().resolveBinding();
 				if (binding != null) {
-					ASTHelper.saveXceotion(binding.getType());
+					ASTHelper.saveXception(binding.getType());
 					logger.debug("Catch clause in test method.");				
 				}
 				else { // cannot resolve exception, ignore it
@@ -379,7 +379,7 @@ public class TestVisitor extends ASTVisitor {
 			if (SourceModel.currentTestMethod() != null) { // if inside a test method
 				 ITypeBinding binding = node.getExpression().resolveTypeBinding();
 				if (binding != null) {
-					ASTHelper.saveXceotion(binding);
+					ASTHelper.saveXception(binding);
 					logger.debug("Throw statement in test method");				
 				}
 				else { // cannot resolve exception type, ignore it

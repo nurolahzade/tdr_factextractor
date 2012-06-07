@@ -226,7 +226,9 @@ public class ASTHelper {
 	public static TestMethod saveTestMethod(IMethodBinding binding) {
 		TestMethodService testMethodService = new TestMethodService();
 		TestMethod method = testMethodService.create(binding.getName(), SourceModel.currentClazz());
+		ITypeBinding[] exceptions = binding.getExceptionTypes();
 		SourceModel.stepIntoTestMethod(method);
+		saveXceptions(exceptions);
 		return method;
 	}
 	
@@ -254,12 +256,24 @@ public class ASTHelper {
 	 * Persist exception class.
 	 * Returns the persisted exception.
 	 */
-	public static Xception saveXceotion(ITypeBinding binding) {
+	public static Xception saveXception(ITypeBinding binding) {
 		Clazz clazz = loadClazz(binding);		
 		XceptionService service = new XceptionService();
 		TestMethod testMethod = SourceModel.currentTestMethod();
 		Xception xception = service.createOrGet(clazz, testMethod);
 		return xception;
+	}
+
+	/*
+	 * Persist method exception classes.
+	 * Returns the persisted exceptions.
+	 */
+	public static Xception[] saveXceptions(ITypeBinding[] bindings) {
+		Xception[] xceptions = new Xception[bindings.length];
+		for (int i = 0; i < bindings.length; ++i) {
+			xceptions[i] = saveXception(bindings[i]);
+		}
+		return xceptions;
 	}
 
 	/*
