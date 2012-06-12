@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
@@ -101,7 +100,7 @@ public class TestVisitor extends ASTVisitor {
 				IMethodBinding binding = node.resolveBinding();
 				if (binding != null) {
 					if (testClazz.getType() == ObjectType.JUNIT3) { // if inside a JUnit 3.x test class
-						//todo - only public void methods are test methods, others are just helpers
+						//TODO - only public void methods are test methods, others are just helpers
 						isTestMethod = true;
 						ASTHelper.saveTestMethod(binding);
 						logger.debug("This is a junit 3 test method: " + binding.getName());					
@@ -151,7 +150,7 @@ public class TestVisitor extends ASTVisitor {
 				ASTHelper.visit(binding, node.arguments());
 			}
 			else { // method call is happening outside any test method, ignore it
-				//todo - test helper method have to be covered
+				//TODO - test helper method have to be covered
 				SourceModel.ignoreInvocation();
 				logger.debug("Method invocation outside test method was ignored: " + node.getName().getFullyQualifiedName());
 				return false;
@@ -179,7 +178,7 @@ public class TestVisitor extends ASTVisitor {
 				ASTHelper.visit(binding, node.arguments());
 			}
 			else { // method call is happening outside any test method, ignore it
-				//todo - test helper method have to be covered
+				//TODO - test helper method have to be covered
 				SourceModel.ignoreInvocation();
 				logger.debug("Super method invocation outside test method was ignored: " + node.getName().getFullyQualifiedName());
 				return false;
@@ -214,7 +213,7 @@ public class TestVisitor extends ASTVisitor {
 				}				
 			}
 			else { // constructor call is happening outside any test method, ignore it
-				//todo - test helper methods and attribute initializations have to be covered
+				//TODO - test helper methods and attribute initializations have to be covered
 				SourceModel.ignoreInvocation();
 				logger.debug("Constructor invocation outside test method was ignored.");
 				return false;
@@ -239,8 +238,8 @@ public class TestVisitor extends ASTVisitor {
 				return ASTHelper.visit(binding, true);
 			}
 			else { // field was accessed outside a test method, ignore it
-				//todo - if it is used for initializing a field that is later used in a test method, then we should not ignore it
-				//todo - test helper methods have to be covered
+				//TODO - if it is used for initializing a field that is later used in a test method, then we should not ignore it
+				//TODO - test helper methods have to be covered
 				logger.debug("Field access outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
@@ -257,8 +256,8 @@ public class TestVisitor extends ASTVisitor {
 				return ASTHelper.visit(binding, true);
 			}
 			else { // field was accessed outside a test method, ignore it
-				//todo - if it is used for initializing a field that is later used in a test method, then we should not ignore it
-				//todo - test helper methods have to be covered
+				//TODO - if it is used for initializing a field that is later used in a test method, then we should not ignore it
+				//TODO - test helper methods have to be covered
 				logger.debug("Field access outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
@@ -284,8 +283,8 @@ public class TestVisitor extends ASTVisitor {
 				}				
 			}
 			else { // simple name was accessed outside a test method, ignore it
-				//todo - if it is used for initializing a field that is later used in a test method, then we should not ignore it
-				//todo - test helper methods have to be covered
+				//TODO - if it is used for initializing a field that is later used in a test method, then we should not ignore it
+				//TODO - test helper methods have to be covered
 				logger.debug("Variable access outside test method was ignored: " + node.getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
@@ -312,8 +311,8 @@ public class TestVisitor extends ASTVisitor {
 				}				
 			}
 			else { // qualified name was accessed outside a test method, ignore it
-				//todo - if it is used for initializing a field that is later used in a test method, then we should not ignore it
-				//todo - test helper methods have to be covered
+				//TODO - if it is used for initializing a field that is later used in a test method, then we should not ignore it
+				//TODO - test helper methods have to be covered
 				logger.debug("Qualified name access outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
@@ -340,8 +339,8 @@ public class TestVisitor extends ASTVisitor {
 				}				
 			}
 			else { // variable declaration is happening outside a test method, ignore it
-				//todo - if this field is used in the test cases and is initialized here, then we should not ignore it
-				//todo - test helper methods have to be covered
+				//TODO - if this field is used in the test cases and is initialized here, then we should not ignore it
+				//TODO - test helper methods have to be covered
 				logger.debug("Variable declaration fragment outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
@@ -364,7 +363,7 @@ public class TestVisitor extends ASTVisitor {
 				}
 			}
 			else { // catch clause is outside a test method, ignore it
-				//todo - test helper methods have to be covered 
+				//TODO - test helper methods have to be covered 
 				logger.debug("Catch clause outside test method was ignored.");
 			}
 		} catch (Throwable t) {
@@ -387,7 +386,7 @@ public class TestVisitor extends ASTVisitor {
 				}
 			}
 			else { // throw statement is outside a test method, ignore it
-				//todo - test helper methods have to be covered
+				//TODO - test helper methods have to be covered
 				logger.debug("Throw statement outisde test method was ignored.");
 			}
 		} catch (Throwable t) {
@@ -400,7 +399,7 @@ public class TestVisitor extends ASTVisitor {
 	public boolean visit(BooleanLiteral node) {
 		try {
 			boolean literal = node.booleanValue();
-			//todo - save boolean literal (for the sake of importing into the Solr index)
+			//TODO - save boolean literal (for the sake of importing into the Solr index)
 			logger.debug("Literal: " + literal);
 		} catch (Throwable t) {
 			logger.warn(t.getMessage());
@@ -412,7 +411,7 @@ public class TestVisitor extends ASTVisitor {
 	public boolean visit(CharacterLiteral node) {
 		try {
 			char literal = node.charValue();
-			//todo - save character literal (for the sake of importing into the Solr index)
+			//TODO - save character literal (for the sake of importing into the Solr index)
 			logger.debug("Literal: " + literal);
 		} catch (Throwable t) {
 			logger.warn(t.getMessage());
@@ -423,7 +422,7 @@ public class TestVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(NullLiteral node) {
 		try {
-			//todo - save NULL literal (for the sake of importing into the Solr index)
+			//TODO - save NULL literal (for the sake of importing into the Solr index)
 			logger.debug("Literal: null");
 		} catch (Throwable t) {
 			logger.warn(t.getMessage());
@@ -435,7 +434,7 @@ public class TestVisitor extends ASTVisitor {
 	public boolean visit(NumberLiteral node) {
 		try {
 			String literal = node.getToken();
-			//todo - save numeric literal (for the sake of importing into the Solr index)
+			//TODO - save numeric literal (for the sake of importing into the Solr index)
 			logger.debug("Literal: " + literal);
 		} catch (Throwable t) {
 			logger.warn(t.getMessage());
@@ -447,7 +446,7 @@ public class TestVisitor extends ASTVisitor {
 	public boolean visit(StringLiteral node) {
 		try {
 			String literal = node.getLiteralValue();
-			//todo - save string literal (for the sake of importing into the Solr index)
+			//TODO - save string literal (for the sake of importing into the Solr index)
 			logger.debug("Literal: " + literal);
 		} catch (Throwable t) {
 			logger.warn(t.getMessage());
