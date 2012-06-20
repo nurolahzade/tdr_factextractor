@@ -13,13 +13,15 @@ public class JavaSourceVisitor extends FileSystemVisitor {
 
 	@Override
 	public void visit(File file) {
-		SourceFileService sourceService = new SourceFileService();
-		SourceFile source = sourceService.create(SourceModel.currentProject(), file.getAbsolutePath());
-		SourceModel.stepIntoSourceFile(source);
-		
-		CompilationUnit cu = PPAUtil.getCU(file, new PPAOptions());
-		TestVisitor visitor = new TestVisitor();
-		cu.accept(visitor);
+		if (file.getName().endsWith(".java")) {
+			SourceFileService sourceService = new SourceFileService();
+			SourceFile source = sourceService.create(SourceModel.currentProject(), file.getAbsolutePath());
+			SourceModel.stepIntoSourceFile(source);
+			
+			CompilationUnit cu = PPAUtil.getCU(file, new PPAOptions());
+			TestVisitor visitor = new TestVisitor();
+			cu.accept(visitor);			
+		}
 				
 		super.visit(file);
 	}	

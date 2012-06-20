@@ -15,9 +15,7 @@ public class FileSystemVisitor {
             	}
             }
             else {
-                if (f.getName().endsWith(".java")) {
-                	visit(f);
-                }
+                visit(f);
             }
         }
     }
