@@ -18,8 +18,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import ca.mcgill.cs.swevo.ppa.PPAOptions;
-import ca.mcgill.cs.swevo.ppa.ui.PPAUtil;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Project;
 import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.service.ProjectService;
@@ -85,7 +83,7 @@ public class Application implements IApplication {
 		SourceModel.stepIntoProject(prj);
 
 		JavaSourceVisitor sourceVisitor = new JavaSourceVisitor();
-		sourceVisitor.walk("/Users/mnurolahzade/Desktop/MEROSVNROOT");
+		sourceVisitor.walk(new File("/Users/mnurolahzade/Desktop/MEROSVNROOT"));
 	}
 	
 	private static CompilationUnit parse(ICompilationUnit unit) {

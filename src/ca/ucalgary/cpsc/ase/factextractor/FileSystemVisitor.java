@@ -4,15 +4,14 @@ import java.io.File;
 
 public class FileSystemVisitor {
 
-	public void walk(String path) {
+	public void walk(File root) {
 
-        File root = new File(path);
         File[] files = root.listFiles();
 
         for (File f : files) {
             if (f.isDirectory()) {
             	if (visitDirectory(f)) {
-                    walk(f.getAbsolutePath());            		
+                    walk(f);            		
             	}
             }
             else {
