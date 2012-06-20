@@ -1,5 +1,7 @@
 package ca.ucalgary.cpsc.ase.factextractor;
 
+import java.io.File;
+
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -16,6 +18,8 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import ca.mcgill.cs.swevo.ppa.PPAOptions;
+import ca.mcgill.cs.swevo.ppa.ui.PPAUtil;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Project;
 import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.service.ProjectService;
@@ -27,6 +31,11 @@ public class Application implements IApplication {
 
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
+		iterateFileSystem();
+		return IApplication.EXIT_OK;
+	}
+	
+	private void iterateWorkspace() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		// Get all projects in the workspace
@@ -59,7 +68,6 @@ public class Application implements IApplication {
 								CompilationUnit parse = parse(unit);
 								TestVisitor visitor = new TestVisitor();
 								parse.accept(visitor);
-								
 							}
 						}
 
@@ -68,8 +76,12 @@ public class Application implements IApplication {
 			} catch (CoreException e) {
 				logger.warn(e.getMessage());
 			}
-		}
-		return IApplication.EXIT_OK;
+		}		
+	}
+	
+	private void iterateFileSystem() {
+		JavaSourceVisitor sourceVisitor = new JavaSourceVisitor();
+		sourceVisitor.walk("/Users/mnurolahzade/Desktop/MEROSVNROOT");
 	}
 	
 	private static CompilationUnit parse(ICompilationUnit unit) {
