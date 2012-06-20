@@ -1,6 +1,7 @@
 package ca.ucalgary.cpsc.ase.factextractor;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
@@ -18,10 +19,16 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import ca.mcgill.cs.swevo.ppa.PPAOptions;
+import ca.mcgill.cs.swevo.ppa.ui.PPAUtil;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Project;
+import ca.ucalgary.cpsc.ase.FactManager.entity.RepositoryFile;
 import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.service.ProjectService;
+import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
 
 public class Application implements IApplication {
 	
@@ -29,7 +36,8 @@ public class Application implements IApplication {
 
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
-		iterateFileSystem();
+		iterateFileSystem();		
+//		iterateWorkspace()
 		return IApplication.EXIT_OK;
 	}
 	
@@ -78,12 +86,24 @@ public class Application implements IApplication {
 	}
 	
 	private void iterateFileSystem() {
-		ProjectService projectService = new ProjectService();
-		Project prj = projectService.create("MEROSVNROOT", null);
-		SourceModel.stepIntoProject(prj);
-
-		JavaSourceVisitor sourceVisitor = new JavaSourceVisitor();
-		sourceVisitor.walk(new File("/Users/mnurolahzade/Desktop/MEROSVNROOT"));
+		SourceFileService sourceService = new SourceFileService();
+		RepositoryFileService repositoryService = new RepositoryFileService();
+		
+		List<RepositoryFile> unvisited;
+		do {
+			unvisited = repositoryService.findUnvisited();
+			for (RepositoryFile file : unvisited) {				
+				SourceFile source = sourceService.create(SourceModel.currentProject(), file.getPath());
+				SourceModel.stepIntoSourceFile(source);
+				
+				CompilationUnit cu = PPAUtil.getCU(new File(file.getPath()), new PPAOptions());
+				TestVisitor visitor = new TestVisitor();
+				cu.accept(visitor);
+				
+				repositoryService.visit(file);
+			}
+			
+		} while (unvisited.size() > 0);		
 	}
 	
 	private static CompilationUnit parse(ICompilationUnit unit) {

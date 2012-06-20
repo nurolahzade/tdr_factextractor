@@ -1,4 +1,4 @@
-package ca.ucalgary.cpsc.ase.factextractor;
+package ca.ucalgary.cpsc.ase.factextractor.dump;
 
 import java.io.File;
 
