@@ -58,13 +58,13 @@ public class Application implements IApplication {
 						if (mypackage.getKind() == IPackageFragmentRoot.K_SOURCE) {
 							for (ICompilationUnit unit : mypackage
 									.getCompilationUnits()) {
-								// Now create the AST for the ICompilationUnits
 								SourceFileService sourceService = new SourceFileService();
 								String path = unit.getPath().toString();
 								SourceFile source = sourceService.create(SourceModel.currentProject(), path);
 								SourceModel.stepIntoSourceFile(source);
 								logger.debug("File: " + path);
 								
+								// Now create the AST for the ICompilationUnits
 								CompilationUnit parse = parse(unit);
 								TestVisitor visitor = new TestVisitor();
 								parse.accept(visitor);
@@ -80,6 +80,10 @@ public class Application implements IApplication {
 	}
 	
 	private void iterateFileSystem() {
+		ProjectService projectService = new ProjectService();
+		Project prj = projectService.create("MEROSVNROOT", null);
+		SourceModel.stepIntoProject(prj);
+
 		JavaSourceVisitor sourceVisitor = new JavaSourceVisitor();
 		sourceVisitor.walk("/Users/mnurolahzade/Desktop/MEROSVNROOT");
 	}
