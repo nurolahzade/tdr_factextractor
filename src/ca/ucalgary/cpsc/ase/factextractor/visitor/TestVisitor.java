@@ -34,10 +34,18 @@ import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Invocation;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
+import ca.ucalgary.cpsc.ase.factextractor.persist.TestRecorder;
 
 public class TestVisitor extends ASTVisitor {
 	
 	private static Logger logger = Logger.getLogger(ASTVisitor.class);
+	
+	private TestRecorder recorder;
+	
+	public TestVisitor(TestRecorder recorder) {
+		super();
+		this.recorder = recorder;
+	}
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
@@ -50,13 +58,13 @@ public class TestVisitor extends ASTVisitor {
 						Type superclass= node.getSuperclassType();
 						if (superclass != null) { // if it extends any class
 							if (ASTHelper.isSubClassOf(node, "junit.framework.TestCase")) { // if it is a JUnit 3.x class
-								ASTHelper.saveTestClazz(binding, ObjectType.JUNIT3);
+								recorder.saveTestClazz(binding, ObjectType.JUNIT3);
 								logger.debug("This is a junit 3 test class.");
 								return super.visit(node);																	
 							}
 						}
 						if (ASTHelper.isJunit4TestClass(binding)) { // if it is a JUnit 4.x class
-							ASTHelper.saveTestClazz(binding, ObjectType.JUNIT4);
+							recorder.saveTestClazz(binding, ObjectType.JUNIT4);
 							logger.debug("This is a junit 4 test class: " + binding.getQualifiedName());
 							return super.visit(node);
 						}
@@ -102,18 +110,18 @@ public class TestVisitor extends ASTVisitor {
 					if (testClazz.getType() == ObjectType.JUNIT3) { // if inside a JUnit 3.x test class
 						//TODO - only public void methods are test methods, others are just helpers
 						isTestMethod = true;
-						ASTHelper.saveTestMethod(binding);
+						recorder.saveTestMethod(binding);
 						logger.debug("This is a junit 3 test method: " + binding.getName());					
 					}	
 					else if (testClazz.getType() == ObjectType.JUNIT4) { // if inside a JUnit 4.z test class						
 						for (IAnnotationBinding annotation : binding.getAnnotations()) {						
 							if ("org.junit.Test".equals(annotation.getAnnotationType().getQualifiedName())) { // if method is marked with @Test
 								isTestMethod = true;
-								ASTHelper.saveTestMethod(binding);
+								recorder.saveTestMethod(binding);
 								logger.debug("This is a junit 4 test method: " + binding.getName());											
 								for (IMemberValuePairBinding valuePair : annotation.getDeclaredMemberValuePairs()) {
 									if ("expected".equals(valuePair.getName())) { // if JUnit 4.x test method expects an exception to be thrown
-										ASTHelper.saveXception((ITypeBinding)valuePair.getValue());
+										recorder.saveXception((ITypeBinding)valuePair.getValue());
 										logger.debug("Test method expects exception: " + binding.getName());
 									}
 								}
@@ -147,7 +155,7 @@ public class TestVisitor extends ASTVisitor {
 		try {
 			if (SourceModel.currentTestMethod() != null) { // if inside a JUnit test method
 				IMethodBinding binding = node.resolveMethodBinding();
-				ASTHelper.visit(binding, node.arguments());
+				recorder.visit(binding, node.arguments());
 			}
 			else { // method call is happening outside any test method, ignore it
 				//TODO - test helper method have to be covered
@@ -175,7 +183,7 @@ public class TestVisitor extends ASTVisitor {
 		try {			
 			if (SourceModel.currentTestMethod() != null) { // if inside a JUnit test method
 				IMethodBinding binding = node.resolveMethodBinding();
-				ASTHelper.visit(binding, node.arguments());
+				recorder.visit(binding, node.arguments());
 			}
 			else { // method call is happening outside any test method, ignore it
 				//TODO - test helper method have to be covered
@@ -203,7 +211,7 @@ public class TestVisitor extends ASTVisitor {
 				if (binding != null) {
 					Assertion assertion = SourceModel.currentAssertion();
 					List<Expression> arguments = node.arguments();				
-					ASTHelper.saveMethodCall(binding, arguments, assertion);
+					recorder.saveMethodCall(binding, arguments, assertion);
 					logger.debug("Constructor invocation in test method: " + binding.getName());
 				}
 				else { // method call cannot be resolved, ignore it
@@ -235,7 +243,7 @@ public class TestVisitor extends ASTVisitor {
 		try {
 			if (SourceModel.currentTestMethod() != null) { // if inside a test method
 				IVariableBinding binding = node.resolveFieldBinding();
-				return ASTHelper.visit(binding, true);
+				return recorder.visit(binding, true);
 			}
 			else { // field was accessed outside a test method, ignore it
 				//TODO - if it is used for initializing a field that is later used in a test method, then we should not ignore it
@@ -253,7 +261,7 @@ public class TestVisitor extends ASTVisitor {
 		try {
 			if (SourceModel.currentTestMethod() != null) { // if inside a test method
 				IVariableBinding binding = node.resolveFieldBinding();
-				return ASTHelper.visit(binding, true);
+				return recorder.visit(binding, true);
 			}
 			else { // field was accessed outside a test method, ignore it
 				//TODO - if it is used for initializing a field that is later used in a test method, then we should not ignore it
@@ -274,7 +282,7 @@ public class TestVisitor extends ASTVisitor {
 				if (binding != null) {
 					if (binding.getKind() == IBinding.VARIABLE) { // if it is a local variable 
 						IVariableBinding variableBinding = (IVariableBinding) binding;
-						ASTHelper.visit(variableBinding, false);
+						recorder.visit(variableBinding, false);
 					}				
 				}
 				else { // cannot resolve simple name, ignore it
@@ -302,7 +310,7 @@ public class TestVisitor extends ASTVisitor {
 				if (binding != null) {
 					if (binding.getKind() == IBinding.VARIABLE) { // if it is a field or local variable 
 						IVariableBinding variableBinding = (IVariableBinding) binding;
-						ASTHelper.visit(variableBinding, false);
+						recorder.visit(variableBinding, false);
 					}				
 				}
 				else { // cannot resolve qualified name, ignore it
@@ -331,7 +339,7 @@ public class TestVisitor extends ASTVisitor {
 				if (binding != null) {
 					ITypeBinding variableType = binding.getType();
 					ITypeBinding declaringClass = binding.getDeclaringClass();
-					ASTHelper.saveReference(variableName, variableType, declaringClass);
+					recorder.saveReference(variableName, variableType, declaringClass);
 					logger.debug("Variable declaration in test method: " + binding.getName());
 				}
 				else { // cannot resolve variable declaration, ignore it
@@ -355,7 +363,7 @@ public class TestVisitor extends ASTVisitor {
 			if (SourceModel.currentTestMethod() != null) { // if inside a test method
 				IVariableBinding binding = node.getException().resolveBinding();
 				if (binding != null) {
-					ASTHelper.saveXception(binding.getType());
+					recorder.saveXception(binding.getType());
 					logger.debug("Catch clause in test method.");				
 				}
 				else { // cannot resolve exception, ignore it
@@ -378,7 +386,7 @@ public class TestVisitor extends ASTVisitor {
 			if (SourceModel.currentTestMethod() != null) { // if inside a test method
 				 ITypeBinding binding = node.getExpression().resolveTypeBinding();
 				if (binding != null) {
-					ASTHelper.saveXception(binding);
+					recorder.saveXception(binding);
 					logger.debug("Throw statement in test method");				
 				}
 				else { // cannot resolve exception type, ignore it

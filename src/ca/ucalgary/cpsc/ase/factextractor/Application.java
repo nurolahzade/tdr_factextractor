@@ -27,6 +27,7 @@ import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.service.ProjectService;
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
+import ca.ucalgary.cpsc.ase.factextractor.persist.DatabaseWriter;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
 
@@ -72,7 +73,7 @@ public class Application implements IApplication {
 								
 								// Now create the AST for the ICompilationUnits
 								CompilationUnit parse = parse(unit);
-								TestVisitor visitor = new TestVisitor();
+								TestVisitor visitor = new TestVisitor(new DatabaseWriter());
 								parse.accept(visitor);
 							}
 						}
@@ -97,7 +98,7 @@ public class Application implements IApplication {
 				SourceModel.stepIntoSourceFile(source);
 				
 				CompilationUnit cu = PPAUtil.getCU(new File(file.getPath()), new PPAOptions());
-				TestVisitor visitor = new TestVisitor();
+				TestVisitor visitor = new TestVisitor(new DatabaseWriter());
 				cu.accept(visitor);
 				
 				repositoryService.visit(file);
