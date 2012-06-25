@@ -14,4 +14,6 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/log4j-1.2.16.jar,
  .
 Import-Package: ca.ucalgary.cpsc.ase.FactManager.entity,
- ca.ucalgary.cpsc.ase.FactManager.service
+ ca.ucalgary.cpsc.ase.FactManager.service,
+ ca.ucalgary.cpsc.ase.QueryManager,
+ ca.ucalgary.cpsc.ase.QueryManager.query

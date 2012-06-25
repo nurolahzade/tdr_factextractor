@@ -34,7 +34,7 @@ import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Invocation;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
-import ca.ucalgary.cpsc.ase.factextractor.persist.TestRecorder;
+import ca.ucalgary.cpsc.ase.factextractor.writer.TestRecorder;
 
 public class TestVisitor extends ASTVisitor {
 	
@@ -45,6 +45,10 @@ public class TestVisitor extends ASTVisitor {
 	public TestVisitor(TestRecorder recorder) {
 		super();
 		this.recorder = recorder;
+	}
+	
+	public TestRecorder getRecorder() {
+		return this.recorder;
 	}
 
 	@Override

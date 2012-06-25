@@ -27,9 +27,9 @@ import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.service.ProjectService;
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
-import ca.ucalgary.cpsc.ase.factextractor.persist.DatabaseWriter;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
+import ca.ucalgary.cpsc.ase.factextractor.writer.DatabaseWriter;
 
 public class Application implements IApplication {
 	

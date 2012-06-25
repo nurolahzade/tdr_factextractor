@@ -1,4 +1,4 @@
-package ca.ucalgary.cpsc.ase.factextractor.persist;
+package ca.ucalgary.cpsc.ase.factextractor.writer;
 
 import java.util.List;
 
@@ -23,14 +23,13 @@ import ca.ucalgary.cpsc.ase.FactManager.service.XceptionService;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.ASTHelper;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 
-public class DatabaseWriter implements TestRecorder {
+public class DatabaseWriter extends TestRecorder {
 	
 	private static Logger logger = Logger.getLogger(DatabaseWriter.class);	
 
 	/*
 	 * Persist test class as a JUnit 3.x or JUnit 4.x test class.
 	 * Test class might already have been persisted.
-	 * Returns the persisted test class.
 	 */
 	@Override
 	public void saveTestClazz(ITypeBinding binding, ObjectType type) {
@@ -58,7 +57,6 @@ public class DatabaseWriter implements TestRecorder {
 	
 	/*
 	 * Persist test method. 
-	 * Returns the persisted test method.
 	 */
 	@Override
 	public void saveTestMethod(IMethodBinding binding) {
@@ -71,7 +69,6 @@ public class DatabaseWriter implements TestRecorder {
 	
 	/*
 	 * Persist method call.
-	 * Returns the persisted method call.
 	 */
 	@Override
 	public void saveMethodCall(IMethodBinding binding, List<Expression> arguments, Assertion assertion) {
@@ -91,7 +88,6 @@ public class DatabaseWriter implements TestRecorder {
 
 	/*
 	 * Persist exception class.
-	 * Returns the persisted exception.
 	 */
 	@Override
 	public void saveXception(ITypeBinding binding) {
@@ -114,7 +110,6 @@ public class DatabaseWriter implements TestRecorder {
 
 	/*
 	 * Persist a reference to referenceType by (optional) name that is an attribute of (optional) declaringClass.
-	 * Returns the persisted reference.
 	 */
 	@Override
 	public void saveReference(String name, ITypeBinding referenceType, ITypeBinding declaringClass) {
@@ -129,7 +124,6 @@ public class DatabaseWriter implements TestRecorder {
 
 	/*
 	 * Persist assertion.
-	 * Returns the persisted assertion.
 	 */
 	@Override
 	public void saveAssertion(IMethodBinding binding) {
@@ -141,57 +135,5 @@ public class DatabaseWriter implements TestRecorder {
 		SourceModel.stepIntoInvocation(assertion);
 		SourceModel.stepIntoAssertion(assertion);
 	}
-	
-	@Override
-	public boolean visit(IVariableBinding binding, boolean isField) {
-		if (binding != null) {
-			ITypeBinding referenceType = binding.getType(); 
-			ITypeBinding declaringClass = binding.getDeclaringClass();
-			String referenceName = binding.getName();
-			if (declaringClass != null || referenceType.isPrimitive() || referenceType.isArray()) { // if is a primitive or array, or a property of a known class
-				//todo add assertion on field access tracking
-				saveReference(referenceName, referenceType, declaringClass);
-				logger.debug("Reference access in test method: " + binding.getName());
-			}
-			else {				
-				if (isField && declaringClass == null) { // it is an object field but we don't know the class it belongs to, ignore it
-					logger.warn("Field declaring class binding was not resolved: " + referenceName);
-					return false;
-				}					
-			}
-		}
-		else { // cannot resolve field access, ignore it
-			logger.warn("IVariableBinding node binding was not resolved.");
-			return false;
-		}
-		return true;
-	}
-	
-	@Override
-	public boolean visit(IMethodBinding binding, List<Expression> arguments) {
-		if (binding != null) {
-			Assertion assertion = SourceModel.currentAssertion();
-			if ("junit.framework.Assert".equals(binding.getDeclaringClass().getQualifiedName())) { // if this is an Assert method call
-				if (assertion != null) { // nested assertions are not allowed
-					logger.error("New assertion reached while assertion flag is on.");
-				}
-				else { // legitimate assertion
-					saveAssertion(binding);
-					logger.debug("Assertion in test method.");
-				}
-			}
-			else { // this is a non-Assert method call (may or may not have an assertion on it)
-				saveMethodCall(binding, arguments, assertion);
-				logger.debug("Method invocation in test method.");
-			}				
-		}
-		else { // method call cannot be resolved, ignore it
-			SourceModel.ignoreInvocation();
-			logger.warn("MethodInvocation node binding was not resolved.");
-			return false;								
-		}
-		return true;
-	}
-		
-		
+			
 }
