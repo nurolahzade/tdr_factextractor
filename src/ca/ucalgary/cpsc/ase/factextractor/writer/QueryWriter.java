@@ -14,7 +14,10 @@ import ca.ucalgary.cpsc.ase.QueryManager.query.QueryAssertion;
 import ca.ucalgary.cpsc.ase.QueryManager.query.QueryException;
 import ca.ucalgary.cpsc.ase.QueryManager.query.QueryMethod;
 import ca.ucalgary.cpsc.ase.QueryManager.query.QueryReference;
+import ca.ucalgary.cpsc.ase.QueryManager.query.QueryTestClass;
+import ca.ucalgary.cpsc.ase.QueryManager.query.QueryTestMethod;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.ASTHelper;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.QueryModel;
 
 public class QueryWriter extends TestRecorder {
 	
@@ -30,12 +33,19 @@ public class QueryWriter extends TestRecorder {
 	
 	@Override
 	public void saveTestClazz(ITypeBinding binding, ObjectType type) {
-		query.setClassName(binding.getName());		
+		QueryTestClass testClass = new QueryTestClass();
+		testClass.setName(binding.getName());
+		testClass.setPackageName(ASTHelper.getPackageName(binding));
+		query.setTestClass(testClass);
+		QueryModel.stepIntoClazz(testClass);
 	}
 
 	@Override
 	public void saveTestMethod(IMethodBinding binding) {
-		query.setMethodName(binding.getName());
+		QueryTestMethod testMethod = new QueryTestMethod();
+		testMethod.setName(binding.getName());
+		query.setTestMethod(testMethod);
+		QueryModel.stepIntoTestMethod(testMethod);
 	}
 
 	@Override
@@ -51,12 +61,12 @@ public class QueryWriter extends TestRecorder {
 		method.setConstructor(binding.isConstructor());
 		
 		query.add(method);
+		QueryModel.stepIntoInvocation(method);
 	}
 
 	@Override
 	public void saveXception(ITypeBinding binding) {
-		QueryException exception = new QueryException();
-		
+		QueryException exception = new QueryException();		
 		exception.setClazzFqn(binding.getQualifiedName());
 		
 		query.add(exception);
@@ -72,8 +82,7 @@ public class QueryWriter extends TestRecorder {
 	@Override
 	public void saveReference(String name, ITypeBinding referenceType,
 			ITypeBinding declaringClass) {
-		QueryReference reference = new QueryReference();
-		
+		QueryReference reference = new QueryReference();		
 		reference.setName(name);
 		reference.setClazzFqn(referenceType.getQualifiedName());
 		reference.setDeclaringClazzFqn(declaringClass != null ? declaringClass.getQualifiedName() : null);
@@ -83,11 +92,11 @@ public class QueryWriter extends TestRecorder {
 
 	@Override
 	public void saveAssertion(IMethodBinding binding) {
-		QueryAssertion assertion = new QueryAssertion();
-		
+		QueryAssertion assertion = new QueryAssertion();		
 		assertion.setType(AssertionType.getType(binding.getName()));
 		
 		query.add(assertion);
+		QueryModel.stepIntoAssertion(assertion);
 	}
 	
 }

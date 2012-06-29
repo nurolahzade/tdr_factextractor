@@ -2,11 +2,8 @@ package ca.ucalgary.cpsc.ase.factextractor.visitor;
 
 import java.util.Stack;
 
-import org.omg.CORBA.NVList;
-
 import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Invocation;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Method;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Project;
 import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
