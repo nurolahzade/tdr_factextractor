@@ -19,7 +19,7 @@ public class QueryGeneratorTest {
 	}
 	
 	public void testQueryTestFile() throws Exception {
-		File file = new File("/Users/mnurolahzade/Documents/workspace3.6.2/FactExtractor/test-res/2.java");
+		File file = new File("/Users/mnurolahzade/Documents/workspace3.6.2/FactExtractor/test-res/1.java");
 				
 		
 		QueryGenerator generator = new QueryGenerator();

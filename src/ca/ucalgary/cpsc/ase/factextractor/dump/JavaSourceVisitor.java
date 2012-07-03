@@ -2,13 +2,7 @@ package ca.ucalgary.cpsc.ase.factextractor.dump;
 
 import java.io.File;
 
-import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import ca.mcgill.cs.swevo.ppa.PPAOptions;
-import ca.mcgill.cs.swevo.ppa.ui.PPAUtil;
-import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
-import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
 
 public class JavaSourceVisitor extends FileSystemVisitor {
 

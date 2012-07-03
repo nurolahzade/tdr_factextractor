@@ -1,4 +1,4 @@
-import static org.junit.Assert.*;
+import org.junit.Assert;
 
 import junit.framework.TestCase;
 
@@ -10,7 +10,7 @@ public class Base64UtilTest extends TestCase {
     	String base64 = util.encodeString(text);
     	System.out.println(base64);
         String restore = util.decodeString(base64);
-        assertEquals(text, restore);
+        Assert.assertEquals(text, restore);
     }
 /*
     public void testEncode() {

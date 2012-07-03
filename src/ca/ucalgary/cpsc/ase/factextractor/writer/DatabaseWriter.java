@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
 import ca.ucalgary.cpsc.ase.FactManager.entity.AssertionType;
@@ -25,6 +24,12 @@ import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 
 public class DatabaseWriter extends TestRecorder {
 	
+	protected SourceModel model;
+	
+	public DatabaseWriter(SourceModel model) {
+		this.model = model;
+	}
+	
 	private static Logger logger = Logger.getLogger(DatabaseWriter.class);	
 
 	/*
@@ -37,8 +42,8 @@ public class DatabaseWriter extends TestRecorder {
 		String className = binding.getName();
 		String fqn = binding.getQualifiedName();		
 		ClazzService clazzService = new ClazzService();
-		Clazz testClazz = clazzService.createOrGet(className, packageName, fqn, SourceModel.currentSourceFile(), type);
-		SourceModel.stepIntoClazz(testClazz);
+		Clazz testClazz = clazzService.createOrGet(className, packageName, fqn, model.currentSourceFile(), type);
+		model.stepIntoClazz(testClazz);
 	}
 	
 	/*
@@ -61,9 +66,9 @@ public class DatabaseWriter extends TestRecorder {
 	@Override
 	public void saveTestMethod(IMethodBinding binding) {
 		TestMethodService testMethodService = new TestMethodService();
-		TestMethod method = testMethodService.create(binding.getName(), SourceModel.currentClazz());
+		TestMethod method = testMethodService.create(binding.getName(), model.currentClazz());
 		ITypeBinding[] exceptions = binding.getExceptionTypes();
-		SourceModel.stepIntoTestMethod(method);
+		model.stepIntoTestMethod(method);
 		saveXceptions(exceptions);
 	}
 	
@@ -71,7 +76,7 @@ public class DatabaseWriter extends TestRecorder {
 	 * Persist method call.
 	 */
 	@Override
-	public void saveMethodCall(IMethodBinding binding, List<Expression> arguments, Assertion assertion) {
+	public void saveMethodCall(IMethodBinding binding, List<Expression> arguments) {
 		ITypeBinding declaringClass = binding.getDeclaringClass();
 		Clazz clazz = loadClazz(declaringClass);
 		String methodName = binding.getName();
@@ -81,9 +86,9 @@ public class DatabaseWriter extends TestRecorder {
 		int hash = ASTHelper.hash(arguments);
 		
 		MethodService metthodService = new MethodService();
-		TestMethod testMethod = SourceModel.currentTestMethod();
-		Method method = metthodService.createOrGet(methodName, clazz, returnClazz, isConstructor, argumentCount, hash, testMethod, assertion);
-		SourceModel.stepIntoInvocation(method);
+		TestMethod testMethod = model.currentTestMethod();
+		Method method = metthodService.createOrGet(methodName, clazz, returnClazz, isConstructor, argumentCount, hash, testMethod, model.currentAssertion());
+		model.stepIntoInvocation(method);
 	}
 
 	/*
@@ -93,7 +98,7 @@ public class DatabaseWriter extends TestRecorder {
 	public void saveXception(ITypeBinding binding) {
 		Clazz clazz = loadClazz(binding);		
 		XceptionService service = new XceptionService();
-		TestMethod testMethod = SourceModel.currentTestMethod();
+		TestMethod testMethod = model.currentTestMethod();
 		service.createOrGet(clazz, testMethod);
 	}
 
@@ -119,7 +124,7 @@ public class DatabaseWriter extends TestRecorder {
 			declaringClazz = loadClazz(declaringClass);			
 		}
 		ReferenceService service = new ReferenceService();
-		service.createOrGet(name, clazz, declaringClazz, SourceModel.currentTestMethod());		
+		service.createOrGet(name, clazz, declaringClazz, model.currentTestMethod());		
 	}
 
 	/*
@@ -129,11 +134,16 @@ public class DatabaseWriter extends TestRecorder {
 	public void saveAssertion(IMethodBinding binding) {
 		String name = binding.getName();
 		AssertionType type = AssertionType.getType(name);
-		TestMethod testMethod = SourceModel.currentTestMethod();
+		TestMethod testMethod = model.currentTestMethod();
 		AssertionService service = new AssertionService();
 		Assertion assertion = service.createOrGet(type, testMethod);
-		SourceModel.stepIntoInvocation(assertion);
-		SourceModel.stepIntoAssertion(assertion);
+		model.stepIntoInvocation(assertion);
+		model.stepIntoAssertion(assertion);
+	}
+
+	@Override
+	public SourceModel getModel() {
+		return model;
 	}
 			
 }

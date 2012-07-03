@@ -2,36 +2,18 @@
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
-import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
-import ca.ucalgary.cpsc.ase.FactManager.entity.AssertionType;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Xception;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Method;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Reference;
-import ca.ucalgary.cpsc.ase.FactManager.entity.TestMethod;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
-import ca.ucalgary.cpsc.ase.FactManager.service.AssertionService;
-import ca.ucalgary.cpsc.ase.FactManager.service.ClazzService;
-import ca.ucalgary.cpsc.ase.FactManager.service.XceptionService;
-import ca.ucalgary.cpsc.ase.FactManager.service.MethodService;
-import ca.ucalgary.cpsc.ase.FactManager.service.ReferenceService;
-import ca.ucalgary.cpsc.ase.FactManager.service.TestMethodService;
 
 public class ASTHelper {
 	
-	private static Logger logger = Logger.getLogger(ASTHelper.class);
-
 	/*
 	 * Verifies if type is extends/implements supertype.
 	 */
@@ -90,6 +72,18 @@ public class ASTHelper {
 			}
 		}
 		return false;
+	}
+	
+	/*
+	 * Checks if this method is a JUnit 3.x or 4.x Assert method.
+	 * A method is a JUnit 3.x assertion if it belongs to junit.framework.Assert class.
+	 * A method is a JUnit 4.x assertion if it belongs to org.junit.Assert class.
+	 */
+	public static boolean isJunitAssertion(IMethodBinding binding) {
+		String fqn = binding.getDeclaringClass().getQualifiedName();
+		String name = binding.getName();
+		return "junit.framework.Assert".equals(fqn) || "org.junit.Assert".equals(fqn) || (
+				"junit.framework.TestCase".equals(fqn) && (name.startsWith("assert") || name.startsWith("fail")));
 	}
 	
 	/*

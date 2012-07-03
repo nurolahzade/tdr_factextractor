@@ -2,30 +2,22 @@ package ca.ucalgary.cpsc.ase.factextractor.visitor;
 
 import java.util.Stack;
 
+import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.QueryManager.query.QueryAssertion;
-import ca.ucalgary.cpsc.ase.QueryManager.query.QueryMethod;
+import ca.ucalgary.cpsc.ase.QueryManager.query.QueryInvocation;
 import ca.ucalgary.cpsc.ase.QueryManager.query.QueryTestClass;
 import ca.ucalgary.cpsc.ase.QueryManager.query.QueryTestMethod;
 
-public class QueryModel {
+public class QueryModel implements Model {
 
-	private static QueryModel instance;
-	
 	private Stack<QueryTestClass> testClassStack;
 	private QueryTestMethod testMethod;
-	private Stack<QueryMethod> invocations;
+	private Stack<QueryInvocation> invocations;
 	private QueryAssertion assertion;
 	
-	private QueryModel() {
+	public QueryModel() {
 		testClassStack = new Stack<QueryTestClass>();
-		invocations = new Stack<QueryMethod>();
-	}
-	
-	private static synchronized QueryModel getInstance() {
-		if (instance == null) {
-			instance = new QueryModel();
-		}
-		return instance;
+		invocations = new Stack<QueryInvocation>();
 	}
 	
 	private QueryTestClass popTestClass() {
@@ -37,7 +29,7 @@ public class QueryModel {
 	}
 	
 	private QueryTestClass peekTestClass() {
-		return testClassStack.peek();
+		return testClassStack.empty() ? null : testClassStack.peek();
 	}
 
 	private QueryTestMethod getTestMethod() {
@@ -48,16 +40,16 @@ public class QueryModel {
 		this.testMethod = testMethod;
 	}
 	
-	private QueryMethod popInvocation() {
+	private QueryInvocation popInvocation() {
 		return invocations.pop();
 	}
 	
-	private void pushInvocation(QueryMethod invocation) {
+	private void pushInvocation(QueryInvocation invocation) {
 		invocations.push(invocation);
 	}
 		
-	private QueryMethod peekInvocation() {
-		return invocations.peek();
+	private QueryInvocation peekInvocation() {
+		return invocations.empty() ? null : invocations.peek();
 	}
 
 	private QueryAssertion getAssertion() {
@@ -68,60 +60,90 @@ public class QueryModel {
 		this.assertion = assertion;
 	}
 	
-	public static void stepIntoClazz(QueryTestClass clazz) {
-		getInstance().pushTestClazz(clazz);
+	public void stepIntoClazz(QueryTestClass clazz) {
+		pushTestClazz(clazz);
 	}
 	
-	public static void ignoreClazz() {
+	public void ignoreClazz() {
 		stepIntoClazz(null);
 	}
 	
-	public static QueryTestClass stepOutOfClazz() {
-		return getInstance().popTestClass();
+	public void stepOutOfClazz() {
+		popTestClass();
 	}
 	
-	public static QueryTestClass currentClazz() {
-		return getInstance().peekTestClass();
+	public QueryTestClass currentClazz() {
+		return peekTestClass();
 	}
 	
-	public static void stepIntoTestMethod(QueryTestMethod method) {
-		getInstance().setTestMethod(method);
+	public void stepIntoTestMethod(QueryTestMethod method) {
+		setTestMethod(method);
 	}
 	
-	public static void stepOutOfTestMethod() {
-		getInstance().setTestMethod(null);
+	public void stepOutOfTestMethod() {
+		setTestMethod(null);
 	}
 	
-	public static QueryTestMethod currentTestMethod() {
-		return getInstance().getTestMethod();
+	public QueryTestMethod currentTestMethod() {
+		return getTestMethod();
 	}
 	
-	public static void stepIntoAssertion(QueryAssertion assertion) {
-		getInstance().setAssertion(assertion);
+	public void stepIntoAssertion(QueryAssertion assertion) {
+		setAssertion(assertion);
 	}
 	
-	public static void stepOutOfAssertion() {
+	public void stepOutOfAssertion() {
 		stepIntoAssertion(null);
 	}
 	
-	public static QueryAssertion currentAssertion() {
-		return getInstance().getAssertion();
+	public QueryAssertion currentAssertion() {
+		return getAssertion();
 	}
 	
-	public static QueryMethod currentInvocation() {
-		return getInstance().peekInvocation();
+	public QueryInvocation currentInvocation() {
+		return peekInvocation();
 	}
 	
-	public static void stepIntoInvocation(QueryMethod invocation) {
-		getInstance().pushInvocation(invocation);
+	public void stepIntoInvocation(QueryInvocation invocation) {
+		pushInvocation(invocation);
 	}
 	
-	public static void ignoreInvocation() {
+	public void ignoreInvocation() {
 		stepIntoInvocation(null);
 	}
 	
-	public static QueryMethod stepOutOfInvocation() {
-		return getInstance().popInvocation();
+	public void stepOutOfInvocation() {
+		popInvocation();
+	}
+
+	@Override
+	public boolean isJUnit3TestClass() {
+		return currentClazz().getType() == ObjectType.JUNIT3;
+	}
+
+	@Override
+	public boolean isJUnit4TestClass() {
+		return currentClazz().getType() == ObjectType.JUNIT4;
+	}
+
+	@Override
+	public boolean insideAClass() {
+		return currentClazz() != null;
+	}
+
+	@Override
+	public void ignoreTestMethod() {
+		stepIntoTestMethod(null);
+	}
+
+	@Override
+	public boolean insideATestMethod() {
+		return currentTestMethod() != null;
+	}
+
+	@Override
+	public boolean insideAnAssertion() {
+		return currentInvocation() instanceof QueryAssertion;	
 	}
 	
 }

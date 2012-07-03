@@ -8,11 +8,13 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
-import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.ASTHelper;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.Model;
 
 public abstract class TestRecorder {
+		
+	public abstract Model getModel();
 	
 	private static Logger logger = Logger.getLogger(TestRecorder.class);		
 
@@ -20,7 +22,7 @@ public abstract class TestRecorder {
 	
 	public abstract void saveTestMethod(IMethodBinding binding);
 	
-	public abstract void saveMethodCall(IMethodBinding binding, List<Expression> arguments, Assertion assertion);
+	public abstract void saveMethodCall(IMethodBinding binding, List<Expression> arguments);
 
 	public abstract void saveXception(ITypeBinding binding);
 
@@ -56,9 +58,8 @@ public abstract class TestRecorder {
 	
 	public boolean visit(IMethodBinding binding, List<Expression> arguments) {
 		if (binding != null) {
-			Assertion assertion = SourceModel.currentAssertion();
-			if ("junit.framework.Assert".equals(binding.getDeclaringClass().getQualifiedName())) { // if this is an Assert method call
-				if (assertion != null) { // nested assertions are not allowed
+			if (ASTHelper.isJunitAssertion(binding)) { // if this is an Assert method call
+				if (getModel().insideAnAssertion()) { // nested assertions are not allowed
 					logger.error("New assertion reached while assertion flag is on.");
 				}
 				else { // legitimate assertion
@@ -67,12 +68,12 @@ public abstract class TestRecorder {
 				}
 			}
 			else { // this is a non-Assert method call (may or may not have an assertion on it)
-				saveMethodCall(binding, arguments, assertion);
+				saveMethodCall(binding, arguments);
 				logger.debug("Method invocation in test method.");
 			}				
 		}
 		else { // method call cannot be resolved, ignore it
-			SourceModel.ignoreInvocation();
+			getModel().ignoreInvocation();
 			logger.warn("MethodInvocation node binding was not resolved.");
 			return false;								
 		}

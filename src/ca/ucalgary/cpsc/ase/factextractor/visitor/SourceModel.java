@@ -4,14 +4,13 @@ import java.util.Stack;
 
 import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Invocation;
+import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Project;
 import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
 import ca.ucalgary.cpsc.ase.FactManager.entity.TestMethod;
 
-public class SourceModel {
-	
-	private static SourceModel instance;
+public class SourceModel implements Model {
 	
 	private Project project;
 	private SourceFile sourceFile;
@@ -20,16 +19,9 @@ public class SourceModel {
 	private Stack<Invocation> invocations;
 	private Assertion assertion;
 	
-	private SourceModel() {
+	public SourceModel() {
 		testClazzStack = new Stack<Clazz>();
 		invocations = new Stack<Invocation>();
-	}
-	
-	private static synchronized SourceModel getInstance() {
-		if (instance == null) {
-			instance = new SourceModel();
-		}
-		return instance;
 	}
 	
 	private Project getProject() {
@@ -57,7 +49,7 @@ public class SourceModel {
 	}
 	
 	private Clazz peekTestClazz() {
-		return testClazzStack.peek();
+		return testClazzStack.empty() ? null : testClazzStack.peek();
 	}
 
 	private TestMethod getTestMethod() {
@@ -77,7 +69,7 @@ public class SourceModel {
 	}
 		
 	private Invocation peekInvocation() {
-		return invocations.peek();
+		return invocations.empty() ? null : invocations.peek();
 	}
 
 	private Assertion getAssertion() {
@@ -88,76 +80,108 @@ public class SourceModel {
 		this.assertion = assertion;
 	}
 	
-	public static Project currentProject() {
-		return getInstance().getProject();
+	public Project currentProject() {
+		return getProject();
 	}
 	
-	public static void stepIntoProject(Project project) {
-		getInstance().setProject(project);
+	public void stepIntoProject(Project project) {
+		setProject(project);
 	}
 	
-	public static SourceFile currentSourceFile() {
-		return getInstance().getSourceFile();
+	public SourceFile currentSourceFile() {
+		return getSourceFile();
 	}
 	
-	public static void stepIntoSourceFile(SourceFile source) {
-		getInstance().setSourceFile(source);
+	public void stepIntoSourceFile(SourceFile source) {
+		setSourceFile(source);
 	}
 	
-	public static void stepIntoClazz(Clazz clazz) {
-		getInstance().pushTestClazz(clazz);
+	public void stepIntoClazz(Clazz clazz) {
+		pushTestClazz(clazz);
 	}
 	
-	public static void ignoreClazz() {
+	@Override
+	public void ignoreClazz() {
 		stepIntoClazz(null);
 	}
 	
-	public static Clazz stepOutOfClazz() {
-		return getInstance().popTestClazz();
+	@Override
+	public void stepOutOfClazz() {
+		popTestClazz();
 	}
 	
-	public static Clazz currentClazz() {
-		return getInstance().peekTestClazz();
+	public Clazz currentClazz() {
+		return peekTestClazz();
 	}
 	
-	public static void stepIntoTestMethod(TestMethod method) {
-		getInstance().setTestMethod(method);
+	public void stepIntoTestMethod(TestMethod method) {
+		setTestMethod(method);
 	}
 	
-	public static void stepOutOfTestMethod() {
-		getInstance().setTestMethod(null);
+	public void stepOutOfTestMethod() {
+		setTestMethod(null);
 	}
 	
-	public static TestMethod currentTestMethod() {
-		return getInstance().getTestMethod();
+	public TestMethod currentTestMethod() {
+		return getTestMethod();
 	}
 	
-	public static void stepIntoAssertion(Assertion assertion) {
-		getInstance().setAssertion(assertion);
+	public void stepIntoAssertion(Assertion assertion) {
+		setAssertion(assertion);
 	}
 	
-	public static void stepOutOfAssertion() {
+	public void stepOutOfAssertion() {
 		stepIntoAssertion(null);
 	}
 	
-	public static Assertion currentAssertion() {
-		return getInstance().getAssertion();
+	public Assertion currentAssertion() {
+		return getAssertion();
 	}
 	
-	public static Invocation currentInvocation() {
-		return getInstance().peekInvocation();
+	public Invocation currentInvocation() {
+		return peekInvocation();
 	}
 	
-	public static void stepIntoInvocation(Invocation invocation) {
-		getInstance().pushInvocation(invocation);
+	public void stepIntoInvocation(Invocation invocation) {
+		pushInvocation(invocation);
 	}
 	
-	public static void ignoreInvocation() {
+	public void ignoreInvocation() {
 		stepIntoInvocation(null);
 	}
 	
-	public static Invocation stepOutOfInvocation() {
-		return getInstance().popInvocation();
+	public void stepOutOfInvocation() {
+		popInvocation();
+	}
+
+	@Override
+	public boolean isJUnit3TestClass() {
+		return currentClazz().getType() == ObjectType.JUNIT3;
+	}
+
+	@Override
+	public boolean isJUnit4TestClass() {
+		return currentClazz().getType() == ObjectType.JUNIT4;
+	}
+
+	@Override
+	public boolean insideAClass() {
+		return currentClazz() != null;
+	}
+
+	@Override
+	public void ignoreTestMethod() {		
+		stepIntoTestMethod(null);
+	}
+
+	@Override
+	public boolean insideATestMethod() {
+		return currentTestMethod() != null;
+	}
+
+	@Override
+	public boolean insideAnAssertion() {
+		return currentInvocation() instanceof Assertion;
 	}
 	
 }

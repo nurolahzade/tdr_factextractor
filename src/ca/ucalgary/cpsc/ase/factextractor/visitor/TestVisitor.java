@@ -30,9 +30,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Invocation;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.factextractor.writer.TestRecorder;
 
@@ -41,16 +38,18 @@ public class TestVisitor extends ASTVisitor {
 	private static Logger logger = Logger.getLogger(ASTVisitor.class);
 	
 	private TestRecorder recorder;
+	private Model model;
 	
 	public TestVisitor(TestRecorder recorder) {
 		super();
 		this.recorder = recorder;
+		this.model = recorder.getModel();
 	}
 	
 	public TestRecorder getRecorder() {
 		return this.recorder;
 	}
-
+	
 	@Override
 	public boolean visit(TypeDeclaration node) {
 		try {
@@ -73,22 +72,22 @@ public class TestVisitor extends ASTVisitor {
 							return super.visit(node);
 						}
 						else { // not a JUnit 3.x or 4.x test class, ignore it
-							SourceModel.ignoreClazz();
+							model.ignoreClazz();
 							logger.debug("This is not a junit test class: " + binding.getQualifiedName());
 						}
 					}
 					else { // inner class, ignore it
-						SourceModel.ignoreClazz();
+						model.ignoreClazz();
 						logger.debug("Ignoring inner class; junit does not run test methods in inner classes: " + binding.getQualifiedName());					
 					}
 				}					
 				else { // binding is not resolved, ignore it
-					SourceModel.ignoreClazz();
+					model.ignoreClazz();
 					logger.warn("TypeDeclaration node binding was not resolved: " + node.getName().getFullyQualifiedName());
 				}
 			}
 			else { // interface, ignore it
-				SourceModel.ignoreClazz();
+				model.ignoreClazz();
 				logger.debug("Ignoring interface definition: " + node.getName().getFullyQualifiedName());				
 			}
 		} catch (Throwable t) {
@@ -99,7 +98,7 @@ public class TestVisitor extends ASTVisitor {
 			
 	@Override
 	public void endVisit(TypeDeclaration node) {
-		SourceModel.stepOutOfClazz();
+		model.stepOutOfClazz();
 		super.endVisit(node);
 	}
 
@@ -107,17 +106,16 @@ public class TestVisitor extends ASTVisitor {
 	public boolean visit(MethodDeclaration node) {
 		boolean isTestMethod = false;
 		try {
-			Clazz testClazz = SourceModel.currentClazz(); 
-			if (testClazz != null) { // just making sure
+			if (model.insideAClass()) { // just making sure
 				IMethodBinding binding = node.resolveBinding();
 				if (binding != null) {
-					if (testClazz.getType() == ObjectType.JUNIT3) { // if inside a JUnit 3.x test class
+					if (model.isJUnit3TestClass()) { // if inside a JUnit 3.x test class
 						//TODO - only public void methods are test methods, others are just helpers
 						isTestMethod = true;
 						recorder.saveTestMethod(binding);
 						logger.debug("This is a junit 3 test method: " + binding.getName());					
 					}	
-					else if (testClazz.getType() == ObjectType.JUNIT4) { // if inside a JUnit 4.z test class						
+					else if (model.isJUnit4TestClass()) { // if inside a JUnit 4.z test class						
 						for (IAnnotationBinding annotation : binding.getAnnotations()) {						
 							if ("org.junit.Test".equals(annotation.getAnnotationType().getQualifiedName())) { // if method is marked with @Test
 								isTestMethod = true;
@@ -137,7 +135,7 @@ public class TestVisitor extends ASTVisitor {
 					}
 				}
 				else { // method binding cannot be resolved, ignore it
-					SourceModel.stepIntoTestMethod(null);
+					model.ignoreTestMethod();
 					logger.warn("MethodDeclaration node binding was not resolved: " + node.getName().getFullyQualifiedName());
 					return false;													
 				}
@@ -150,20 +148,20 @@ public class TestVisitor extends ASTVisitor {
 	
 	@Override
 	public void endVisit(MethodDeclaration node) {
-		SourceModel.stepOutOfTestMethod();
+		model.stepOutOfTestMethod();
 		super.endVisit(node);
 	}
 		
 	@Override
 	public boolean visit(MethodInvocation node) {
 		try {
-			if (SourceModel.currentTestMethod() != null) { // if inside a JUnit test method
+			if (model.insideATestMethod()) { // if inside a JUnit test method
 				IMethodBinding binding = node.resolveMethodBinding();
 				recorder.visit(binding, node.arguments());
 			}
 			else { // method call is happening outside any test method, ignore it
 				//TODO - test helper method have to be covered
-				SourceModel.ignoreInvocation();
+				model.ignoreInvocation();
 				logger.debug("Method invocation outside test method was ignored: " + node.getName().getFullyQualifiedName());
 				return false;
 			}
@@ -175,23 +173,23 @@ public class TestVisitor extends ASTVisitor {
 
 	@Override
 	public void endVisit(MethodInvocation node) {
-		Invocation invocation = SourceModel.stepOutOfInvocation();
-		if (invocation instanceof Assertion) { // turn off the assertion flag
-			SourceModel.stepOutOfAssertion();			
+		if (model.insideAnAssertion()) { // turn off the assertion flag
+			model.stepOutOfAssertion();			
 		}
+		model.stepOutOfInvocation();
 		super.endVisit(node);
 	}		
 
 	@Override
 	public boolean visit(SuperMethodInvocation node) {
 		try {			
-			if (SourceModel.currentTestMethod() != null) { // if inside a JUnit test method
+			if (model.insideATestMethod()) { // if inside a JUnit test method
 				IMethodBinding binding = node.resolveMethodBinding();
 				recorder.visit(binding, node.arguments());
 			}
 			else { // method call is happening outside any test method, ignore it
 				//TODO - test helper method have to be covered
-				SourceModel.ignoreInvocation();
+				model.ignoreInvocation();
 				logger.debug("Super method invocation outside test method was ignored: " + node.getName().getFullyQualifiedName());
 				return false;
 			}
@@ -203,30 +201,29 @@ public class TestVisitor extends ASTVisitor {
 
 	@Override
 	public void endVisit(SuperMethodInvocation node) {
-		SourceModel.stepOutOfTestMethod();
+		model.stepOutOfInvocation();
 		super.endVisit(node);
 	}
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		try {
-			if (SourceModel.currentTestMethod() != null) { // if inside a JUnit test method
+			if (model.insideAnAssertion()) { // if inside a JUnit test method
 				IMethodBinding binding = node.resolveConstructorBinding();
 				if (binding != null) {
-					Assertion assertion = SourceModel.currentAssertion();
 					List<Expression> arguments = node.arguments();				
-					recorder.saveMethodCall(binding, arguments, assertion);
+					recorder.saveMethodCall(binding, arguments);
 					logger.debug("Constructor invocation in test method: " + binding.getName());
 				}
 				else { // method call cannot be resolved, ignore it
-					SourceModel.ignoreInvocation();
+					model.ignoreInvocation();
 					logger.warn("ConstructorInvocation node binding was not resolved.");
 					return false;								
 				}				
 			}
 			else { // constructor call is happening outside any test method, ignore it
 				//TODO - test helper methods and attribute initializations have to be covered
-				SourceModel.ignoreInvocation();
+				model.ignoreInvocation();
 				logger.debug("Constructor invocation outside test method was ignored.");
 				return false;
 			}			
@@ -238,14 +235,14 @@ public class TestVisitor extends ASTVisitor {
 
 	@Override
 	public void endVisit(ClassInstanceCreation node) {
-		Invocation invocation = SourceModel.stepOutOfInvocation();
+		model.stepOutOfInvocation();
 		super.endVisit(node);
 	}
 
 	@Override
 	public boolean visit(FieldAccess node) {
 		try {
-			if (SourceModel.currentTestMethod() != null) { // if inside a test method
+			if (model.insideATestMethod()) { // if inside a test method
 				IVariableBinding binding = node.resolveFieldBinding();
 				return recorder.visit(binding, true);
 			}
@@ -263,7 +260,7 @@ public class TestVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(SuperFieldAccess node) {
 		try {
-			if (SourceModel.currentTestMethod() != null) { // if inside a test method
+			if (model.insideATestMethod()) { // if inside a test method
 				IVariableBinding binding = node.resolveFieldBinding();
 				return recorder.visit(binding, true);
 			}
@@ -281,7 +278,7 @@ public class TestVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(SimpleName node) {
 		try {
-			if (SourceModel.currentTestMethod() != null) { // if inside a test method
+			if (model.insideATestMethod()) { // if inside a test method
 				IBinding binding = node.resolveBinding();
 				if (binding != null) {
 					if (binding.getKind() == IBinding.VARIABLE) { // if it is a local variable 
@@ -309,7 +306,7 @@ public class TestVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(QualifiedName node) {
 		try {
-			if (SourceModel.currentTestMethod() != null) { // if inside a test method
+			if (model.insideATestMethod()) { // if inside a test method
 				IBinding binding = node.resolveBinding();
 				if (binding != null) {
 					if (binding.getKind() == IBinding.VARIABLE) { // if it is a field or local variable 
@@ -337,7 +334,7 @@ public class TestVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(VariableDeclarationFragment node) {
 		try {
-			if (SourceModel.currentTestMethod() != null) { // if inside a test method
+			if (model.insideATestMethod()) { // if inside a test method
 				IVariableBinding binding = node.resolveBinding();
 				String variableName = node.getName().getFullyQualifiedName();
 				if (binding != null) {
@@ -364,7 +361,7 @@ public class TestVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(CatchClause node) {
 		try {
-			if (SourceModel.currentTestMethod() != null) { // if inside a test method
+			if (model.insideATestMethod()) { // if inside a test method
 				IVariableBinding binding = node.getException().resolveBinding();
 				if (binding != null) {
 					recorder.saveXception(binding.getType());
@@ -387,7 +384,7 @@ public class TestVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(ThrowStatement node) {
 		try {
-			if (SourceModel.currentTestMethod() != null) { // if inside a test method
+			if (model.insideATestMethod()) { // if inside a test method
 				 ITypeBinding binding = node.getExpression().resolveTypeBinding();
 				if (binding != null) {
 					recorder.saveXception(binding);

@@ -6,7 +6,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
 import ca.ucalgary.cpsc.ase.FactManager.entity.AssertionType;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.QueryManager.Query;
@@ -22,9 +21,11 @@ import ca.ucalgary.cpsc.ase.factextractor.visitor.QueryModel;
 public class QueryWriter extends TestRecorder {
 	
 	protected Query query;
+	protected QueryModel model;
 
-	public QueryWriter() {
+	public QueryWriter(QueryModel model) {
 		query = new Query();
+		this.model = model;
 	}
 	
 	public Query getQuery() {
@@ -36,8 +37,9 @@ public class QueryWriter extends TestRecorder {
 		QueryTestClass testClass = new QueryTestClass();
 		testClass.setName(binding.getName());
 		testClass.setPackageName(ASTHelper.getPackageName(binding));
+		testClass.setType(type);
 		query.setTestClass(testClass);
-		QueryModel.stepIntoClazz(testClass);
+		model.stepIntoClazz(testClass);
 	}
 
 	@Override
@@ -45,12 +47,12 @@ public class QueryWriter extends TestRecorder {
 		QueryTestMethod testMethod = new QueryTestMethod();
 		testMethod.setName(binding.getName());
 		query.setTestMethod(testMethod);
-		QueryModel.stepIntoTestMethod(testMethod);
+		model.stepIntoTestMethod(testMethod);
 	}
 
 	@Override
 	public void saveMethodCall(IMethodBinding binding,
-			List<Expression> arguments, Assertion assertion) {
+			List<Expression> arguments) {
 		QueryMethod method = new QueryMethod();
 		
 		method.setName(binding.getName());
@@ -61,7 +63,9 @@ public class QueryWriter extends TestRecorder {
 		method.setConstructor(binding.isConstructor());
 		
 		query.add(method);
-		QueryModel.stepIntoInvocation(method);
+		model.stepIntoInvocation(method);
+		
+		//TODO if this is happening inside an assertion, then create a QueryAssertionParameter
 	}
 
 	@Override
@@ -96,7 +100,13 @@ public class QueryWriter extends TestRecorder {
 		assertion.setType(AssertionType.getType(binding.getName()));
 		
 		query.add(assertion);
-		QueryModel.stepIntoAssertion(assertion);
+		model.stepIntoAssertion(assertion);
+		model.stepIntoInvocation(assertion);
+	}
+
+	@Override
+	public QueryModel getModel() {
+		return model;
 	}
 	
 }

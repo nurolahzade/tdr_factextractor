@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import ca.mcgill.cs.swevo.ppa.PPAOptions;
 import ca.mcgill.cs.swevo.ppa.ui.PPAUtil;
 import ca.ucalgary.cpsc.ase.QueryManager.Query;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.QueryModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
 import ca.ucalgary.cpsc.ase.factextractor.writer.QueryWriter;
 
@@ -18,7 +19,7 @@ public class QueryGenerator {
 	}
 
 	protected Query generate(CompilationUnit cu) {
-		QueryWriter writer = new QueryWriter();
+		QueryWriter writer = new QueryWriter(new QueryModel());
 		TestVisitor visitor = new TestVisitor(writer);
 		cu.accept(visitor);
 		return writer.getQuery();

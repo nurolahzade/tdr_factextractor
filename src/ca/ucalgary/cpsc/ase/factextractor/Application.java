@@ -51,6 +51,9 @@ public class Application implements IApplication {
 		IWorkspaceRoot root = workspace.getRoot();
 		// Get all projects in the workspace
 		IProject[] projects = root.getProjects();
+		
+		SourceModel model = new SourceModel();
+		
 		// Loop over all projects
 		for (IProject project : projects) {
 			try {
@@ -59,7 +62,7 @@ public class Application implements IApplication {
 					String projectVersion = null;
 					ProjectService projectService = new ProjectService();
 					Project prj = projectService.create(projectName, projectVersion);
-					SourceModel.stepIntoProject(prj);
+					model.stepIntoProject(prj);
 					logger.debug("Project: " + projectName);
 					
 					IPackageFragment[] packages = JavaCore.create(project)
@@ -71,13 +74,13 @@ public class Application implements IApplication {
 									.getCompilationUnits()) {
 								SourceFileService sourceService = new SourceFileService();
 								String path = unit.getPath().toString();
-								SourceFile source = sourceService.create(SourceModel.currentProject(), path);
-								SourceModel.stepIntoSourceFile(source);
+								SourceFile source = sourceService.create(model.currentProject(), path);
+								model.stepIntoSourceFile(source);
 								logger.debug("File: " + path);
 								
 								// Now create the AST for the ICompilationUnits
 								CompilationUnit parse = parse(unit);
-								TestVisitor visitor = new TestVisitor(new DatabaseWriter());
+								TestVisitor visitor = new TestVisitor(new DatabaseWriter(model));
 								parse.accept(visitor);
 							}
 						}
@@ -94,15 +97,17 @@ public class Application implements IApplication {
 		SourceFileService sourceService = new SourceFileService();
 		RepositoryFileService repositoryService = new RepositoryFileService();
 		
+		SourceModel model = new SourceModel();
+		
 		List<RepositoryFile> unvisited;
 		do {
 			unvisited = repositoryService.findUnvisited();
 			for (RepositoryFile file : unvisited) {				
-				SourceFile source = sourceService.create(SourceModel.currentProject(), file.getPath());
-				SourceModel.stepIntoSourceFile(source);
+				SourceFile source = sourceService.create(model.currentProject(), file.getPath());
+				model.stepIntoSourceFile(source);
 				
 				CompilationUnit cu = PPAUtil.getCU(new File(file.getPath()), new PPAOptions());
-				TestVisitor visitor = new TestVisitor(new DatabaseWriter());
+				TestVisitor visitor = new TestVisitor(new DatabaseWriter(model));
 				cu.accept(visitor);
 				
 				repositoryService.visit(file);
