@@ -3,8 +3,15 @@ package ca.ucalgary.cpsc.ase.factextractor.dump;
 import java.io.File;
 
 public class FileSystemVisitor {
+	
+	protected File base;
+	
+	public FileSystemVisitor(String path) {
+		base = new File(path);
+		walk(base);
+	}
 
-	public void walk(File root) {
+	protected void walk(File root) {
 
         File[] files = root.listFiles();
 
@@ -20,11 +27,11 @@ public class FileSystemVisitor {
         }
     }
 	
-	public void visit(File file) {
+	protected void visit(File file) {
 		// do nothing
 	}
 	
-	public boolean visitDirectory(File file) {
+	protected boolean visitDirectory(File file) {
 		// do nothing
 		return true;
 	}

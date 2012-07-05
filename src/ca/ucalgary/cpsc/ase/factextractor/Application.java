@@ -1,7 +1,8 @@
 package ca.ucalgary.cpsc.ase.factextractor;
 
-import java.io.File;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
@@ -19,8 +20,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import ca.mcgill.cs.swevo.ppa.PPAOptions;
-import ca.mcgill.cs.swevo.ppa.ui.PPAUtil;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Project;
 import ca.ucalgary.cpsc.ase.FactManager.entity.RepositoryFile;
 import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
@@ -28,6 +27,7 @@ import ca.ucalgary.cpsc.ase.FactManager.service.ProjectService;
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
 import ca.ucalgary.cpsc.ase.factextractor.composer.QueryGeneratorTest;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.Indexer;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
 import ca.ucalgary.cpsc.ase.factextractor.writer.DatabaseWriter;
@@ -38,10 +38,15 @@ public class Application implements IApplication {
 
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
-//		iterateFileSystem();		
+		String[] arguments = (String[]) context.getArguments().get("application.args");
+		if (arguments.length != 1) {
+			System.out.print("Usage: FactExtractor <path>");
+			return IApplication.EXIT_OK;
+		}
+		iterateFileSystem(arguments[0]);		
 //		iterateWorkspace()
-		QueryGeneratorTest test = new QueryGeneratorTest();
-		test.testQueryTestFile();
+//		QueryGeneratorTest test = new QueryGeneratorTest();
+//		test.testQueryTestFile();
 		
 		return IApplication.EXIT_OK;
 	}
@@ -93,27 +98,21 @@ public class Application implements IApplication {
 		}		
 	}
 	
-	private void iterateFileSystem() {
-		SourceFileService sourceService = new SourceFileService();
+	private void iterateFileSystem(String path) {
+		ExecutorService pool = Executors.newFixedThreadPool(5);
+		
 		RepositoryFileService repositoryService = new RepositoryFileService();
-		
-		SourceModel model = new SourceModel();
-		
 		List<RepositoryFile> unvisited;
+		
 		do {
 			unvisited = repositoryService.findUnvisited();
-			for (RepositoryFile file : unvisited) {				
-				SourceFile source = sourceService.create(model.currentProject(), file.getPath());
-				model.stepIntoSourceFile(source);
-				
-				CompilationUnit cu = PPAUtil.getCU(new File(file.getPath()), new PPAOptions());
-				TestVisitor visitor = new TestVisitor(new DatabaseWriter(model));
-				cu.accept(visitor);
-				
-				repositoryService.visit(file);
+			for (RepositoryFile file : unvisited) {
+				pool.execute(new Indexer(path, file));
 			}
 			
-		} while (unvisited.size() > 0);		
+		} while (unvisited.size() > 0);
+		
+		pool.shutdown();
 	}
 	
 	private static CompilationUnit parse(ICompilationUnit unit) {

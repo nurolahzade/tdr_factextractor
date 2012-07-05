@@ -2,18 +2,28 @@ package ca.ucalgary.cpsc.ase.factextractor.dump;
 
 import java.io.File;
 
+import org.eclipse.jdt.internal.codeassist.RelevanceConstants;
+
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 
 public class JavaSourceVisitor extends FileSystemVisitor {
 
+	public JavaSourceVisitor(String path) {
+		super(path);
+	}
+
 	@Override
-	public void visit(File file) {
+	protected void visit(File file) {
 		if (file.getName().endsWith(".java")) {
 			RepositoryFileService service = new RepositoryFileService();
-			service.create(file.getAbsolutePath());
+			service.create(relativize(file));
 		}
 				
 		super.visit(file);
-	}	
+	}
+	
+	protected String relativize(File file) {
+		return base.toURI().relativize(file.toURI()).getPath();
+	}
 	
 }
