@@ -3,6 +3,7 @@ package ca.ucalgary.cpsc.ase.factextractor;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
@@ -27,6 +28,7 @@ import ca.ucalgary.cpsc.ase.FactManager.service.ProjectService;
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
 import ca.ucalgary.cpsc.ase.factextractor.composer.QueryGeneratorTest;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.BoundedExecutor;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.Indexer;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
@@ -100,6 +102,7 @@ public class Application implements IApplication {
 	
 	private void iterateFileSystem(String path) {
 		ExecutorService pool = Executors.newFixedThreadPool(5);
+		BoundedExecutor executor = new BoundedExecutor(pool, 100);
 		
 		RepositoryFileService repositoryService = new RepositoryFileService();
 		List<RepositoryFile> unvisited;
@@ -107,7 +110,13 @@ public class Application implements IApplication {
 		do {
 			unvisited = repositoryService.findUnvisited();
 			for (RepositoryFile file : unvisited) {
-				pool.execute(new Indexer(path, file));
+				try {
+					executor.submit(new Indexer(path, file));
+				} catch (RejectedExecutionException e) {
+					logger.warn(e.getMessage());
+				} catch (InterruptedException e) {
+					logger.warn(e.getMessage());
+				}
 			}
 			
 		} while (unvisited.size() > 0);
