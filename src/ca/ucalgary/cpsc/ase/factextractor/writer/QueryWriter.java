@@ -10,6 +10,7 @@ import ca.ucalgary.cpsc.ase.FactManager.entity.AssertionType;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.QueryManager.Query;
 import ca.ucalgary.cpsc.ase.QueryManager.query.QueryAssertion;
+import ca.ucalgary.cpsc.ase.QueryManager.query.QueryAssertionParameter;
 import ca.ucalgary.cpsc.ase.QueryManager.query.QueryException;
 import ca.ucalgary.cpsc.ase.QueryManager.query.QueryMethod;
 import ca.ucalgary.cpsc.ase.QueryManager.query.QueryReference;
@@ -65,7 +66,14 @@ public class QueryWriter extends TestRecorder {
 		query.add(method);
 		model.stepIntoInvocation(method);
 		
-		//TODO if this is happening inside an assertion, then create a QueryAssertionParameter
+		if (model.insideAnAssertion()) {
+			QueryAssertionParameter parameter = new QueryAssertionParameter();
+			
+			parameter.setAssertion(model.currentAssertion());
+			parameter.setMethod(method);
+			
+			query.add(parameter);
+		}
 	}
 
 	@Override
