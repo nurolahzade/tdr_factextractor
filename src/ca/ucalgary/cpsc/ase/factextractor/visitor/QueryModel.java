@@ -14,10 +14,13 @@ public class QueryModel implements Model {
 	private QueryTestMethod testMethod;
 	private Stack<QueryInvocation> invocations;
 	private QueryAssertion assertion;
+	// workaround for PPA's lack of annotations support
+	private boolean jUnit4TestAnnotation;
 	
 	public QueryModel() {
 		testClassStack = new Stack<QueryTestClass>();
 		invocations = new Stack<QueryInvocation>();
+		jUnit4TestAnnotation = false;
 	}
 	
 	private QueryTestClass popTestClass() {
@@ -144,6 +147,16 @@ public class QueryModel implements Model {
 	@Override
 	public boolean insideAnAssertion() {
 		return currentInvocation() instanceof QueryAssertion;	
+	}
+
+	@Override
+	public void importsJUnit4TestAnnotation() {
+		this.jUnit4TestAnnotation = true;
+	}
+
+	@Override
+	public boolean hasTestAnnotation() {
+		return jUnit4TestAnnotation;
 	}
 	
 }

@@ -101,8 +101,8 @@ public class Application implements IApplication {
 	}
 	
 	private void iterateFileSystem(String path) {
-		ExecutorService pool = Executors.newFixedThreadPool(5);
-		BoundedExecutor executor = new BoundedExecutor(pool, 100);
+		ExecutorService pool = Executors.newFixedThreadPool(10);
+		BoundedExecutor executor = new BoundedExecutor(pool, 10);
 		
 		RepositoryFileService repositoryService = new RepositoryFileService();
 		List<RepositoryFile> unvisited;

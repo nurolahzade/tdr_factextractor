@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NullLiteral;
@@ -66,7 +67,7 @@ public class TestVisitor extends ASTVisitor {
 								return super.visit(node);																	
 							}
 						}
-						if (ASTHelper.isJunit4TestClass(binding)) { // if it is a JUnit 4.x class
+						if (ASTHelper.isJunit4TestClass(binding) || model.hasTestAnnotation()) { // if it is a JUnit 4.x class
 							recorder.saveTestClazz(binding, ObjectType.JUNIT4);
 							logger.debug("This is a junit 4 test class: " + binding.getQualifiedName());
 							return super.visit(node);
@@ -151,7 +152,15 @@ public class TestVisitor extends ASTVisitor {
 		model.stepOutOfTestMethod();
 		super.endVisit(node);
 	}
-		
+				
+	@Override
+	public boolean visit(ImportDeclaration node) {
+		if ("org.junit.Test".equals(node.getName())) {
+			model.importsJUnit4TestAnnotation();			
+		}
+		return super.visit(node);
+	}
+
 	@Override
 	public boolean visit(MethodInvocation node) {
 		try {

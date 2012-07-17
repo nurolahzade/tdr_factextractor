@@ -43,7 +43,7 @@ public class ASTHelper {
 	 * Type may implement supertype either directly or indirectly.
 	 */
 	public static boolean implementsInterface(TypeDeclaration type, String supertype) {
-		//todo
+		//TODO
 		throw new UnsupportedOperationException();
 	}
 	

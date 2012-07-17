@@ -4,6 +4,8 @@ public interface Model {
 
 	public void ignoreClazz();
 	public void stepOutOfClazz();
+	public void importsJUnit4TestAnnotation();
+	public boolean hasTestAnnotation();
 	public boolean isJUnit3TestClass();
 	public boolean isJUnit4TestClass();
 	public boolean insideAClass();

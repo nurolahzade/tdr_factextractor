@@ -18,10 +18,13 @@ public class SourceModel implements Model {
 	private TestMethod testMethod;
 	private Stack<Invocation> invocations;
 	private Assertion assertion;
+	// workaround for PPA's lack of annotations support
+	private boolean jUnit4TestAnnotation;
 	
 	public SourceModel() {
 		testClazzStack = new Stack<Clazz>();
 		invocations = new Stack<Invocation>();
+		jUnit4TestAnnotation = false;
 	}
 	
 	private Project getProject() {
@@ -182,6 +185,16 @@ public class SourceModel implements Model {
 	@Override
 	public boolean insideAnAssertion() {
 		return currentInvocation() instanceof Assertion;
+	}
+
+	@Override
+	public void importsJUnit4TestAnnotation() {
+		jUnit4TestAnnotation = true;		
+	}
+
+	@Override
+	public boolean hasTestAnnotation() {
+		return jUnit4TestAnnotation;
 	}
 	
 }
