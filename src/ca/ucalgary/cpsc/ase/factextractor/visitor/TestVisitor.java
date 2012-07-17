@@ -117,19 +117,19 @@ public class TestVisitor extends ASTVisitor {
 						logger.debug("This is a junit 3 test method: " + binding.getName());					
 					}	
 					else if (model.isJUnit4TestClass()) { // if inside a JUnit 4.z test class						
-						for (IAnnotationBinding annotation : binding.getAnnotations()) {						
-							if ("org.junit.Test".equals(annotation.getAnnotationType().getQualifiedName())) { // if method is marked with @Test
+//						for (IAnnotationBinding annotation : binding.getAnnotations()) {						
+//							if ("org.junit.Test".equals(annotation.getAnnotationType().getQualifiedName())) { // if method is marked with @Test
 								isTestMethod = true;
 								recorder.saveTestMethod(binding);
 								logger.debug("This is a junit 4 test method: " + binding.getName());											
-								for (IMemberValuePairBinding valuePair : annotation.getDeclaredMemberValuePairs()) {
-									if ("expected".equals(valuePair.getName())) { // if JUnit 4.x test method expects an exception to be thrown
-										recorder.saveXception((ITypeBinding)valuePair.getValue());
-										logger.debug("Test method expects exception: " + binding.getName());
-									}
-								}
-							}					
-						}
+//								for (IMemberValuePairBinding valuePair : annotation.getDeclaredMemberValuePairs()) {
+//									if ("expected".equals(valuePair.getName())) { // if JUnit 4.x test method expects an exception to be thrown
+//										recorder.saveXception((ITypeBinding)valuePair.getValue());
+//										logger.debug("Test method expects exception: " + binding.getName());
+//									}
+//								}
+//							}					
+//						}
 					}
 					else {
 						logger.debug("Non-test method declaration was ignored: " + binding.getName());
@@ -155,8 +155,10 @@ public class TestVisitor extends ASTVisitor {
 				
 	@Override
 	public boolean visit(ImportDeclaration node) {
+		// workaround for @Test annotation not detected by PPA
 		if ("org.junit.Test".equals(node.getName())) {
-			model.importsJUnit4TestAnnotation();			
+			model.importsJUnit4TestAnnotation();
+			logger.debug("File imports org.junit.Test annotation.");
 		}
 		return super.visit(node);
 	}
