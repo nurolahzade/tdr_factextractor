@@ -156,7 +156,7 @@ public class TestVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(ImportDeclaration node) {
 		// workaround for @Test annotation not detected by PPA
-		if ("org.junit.Test".equals(node.getName())) {
+		if ("org.junit.Test".equals(node.getName().getFullyQualifiedName())) {
 			model.importsJUnit4TestAnnotation();
 			logger.debug("File imports org.junit.Test annotation.");
 		}
