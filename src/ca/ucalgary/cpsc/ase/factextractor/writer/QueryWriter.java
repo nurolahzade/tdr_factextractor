@@ -2,6 +2,7 @@ package ca.ucalgary.cpsc.ase.factextractor.writer;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -34,7 +35,7 @@ public class QueryWriter extends TestRecorder {
 	}
 	
 	@Override
-	public void saveTestClazz(ITypeBinding binding, ObjectType type) {
+	public void saveTestClazz(ASTNode node, ITypeBinding binding, ObjectType type) {
 		QueryTestClass testClass = new QueryTestClass();
 		testClass.setName(binding.getName());
 		testClass.setPackageName(ASTHelper.getPackageName(binding));
@@ -44,7 +45,7 @@ public class QueryWriter extends TestRecorder {
 	}
 
 	@Override
-	public void saveTestMethod(IMethodBinding binding) {
+	public void saveTestMethod(ASTNode node, IMethodBinding binding) {
 		QueryTestMethod testMethod = new QueryTestMethod();
 		testMethod.setName(binding.getName());
 		query.setTestMethod(testMethod);
@@ -52,7 +53,7 @@ public class QueryWriter extends TestRecorder {
 	}
 
 	@Override
-	public void saveMethodCall(IMethodBinding binding,
+	public void saveMethodCall(ASTNode node, IMethodBinding binding,
 			List<Expression> arguments) {
 		QueryMethod method = new QueryMethod();
 		
@@ -92,7 +93,7 @@ public class QueryWriter extends TestRecorder {
 	}
 
 	@Override
-	public void saveReference(String name, ITypeBinding referenceType,
+	public void saveReference(ASTNode node, String name, ITypeBinding referenceType,
 			ITypeBinding declaringClass) {
 		QueryReference reference = new QueryReference();		
 		reference.setName(name);
@@ -103,7 +104,7 @@ public class QueryWriter extends TestRecorder {
 	}
 
 	@Override
-	public void saveAssertion(IMethodBinding binding) {
+	public void saveAssertion(ASTNode node, IMethodBinding binding) {
 		QueryAssertion assertion = new QueryAssertion();		
 		assertion.setType(AssertionType.getType(binding.getName()));
 		

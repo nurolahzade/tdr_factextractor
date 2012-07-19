@@ -12,7 +12,7 @@ import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
 import ca.ucalgary.cpsc.ase.factextractor.writer.DatabaseWriter;
 
-public class Indexer implements Runnable {
+public class Indexer {
 	
 	protected String root;
 	protected RepositoryFile file;	
@@ -22,7 +22,6 @@ public class Indexer implements Runnable {
 		this.file = file;
 	}
 	
-	@Override
 	public void run() {
 		SourceFileService sourceService = new SourceFileService();
 		SourceModel model = new SourceModel();
@@ -37,5 +36,5 @@ public class Indexer implements Runnable {
 		RepositoryFileService repositoryService = new RepositoryFileService();
 		repositoryService.visit(file);
 	}
-
+	
 }

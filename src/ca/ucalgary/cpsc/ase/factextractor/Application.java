@@ -101,9 +101,8 @@ public class Application implements IApplication {
 	}
 	
 	private void iterateFileSystem(String path) {
-		ExecutorService pool = Executors.newFixedThreadPool(10);
-		BoundedExecutor executor = new BoundedExecutor(pool, 10);
-		
+		BoundedExecutor executor = new BoundedExecutor(path, 10);
+				
 		RepositoryFileService repositoryService = new RepositoryFileService();
 		List<RepositoryFile> unvisited;
 		
@@ -111,7 +110,9 @@ public class Application implements IApplication {
 			unvisited = repositoryService.findUnvisited();
 			for (RepositoryFile file : unvisited) {
 				try {
-					executor.submit(new Indexer(path, file));
+					if (!executor.isRunning(file.getId())) {
+						executor.submit(file);						
+					}
 				} catch (RejectedExecutionException e) {
 					logger.warn(e.getMessage());
 				} catch (InterruptedException e) {
@@ -121,7 +122,7 @@ public class Application implements IApplication {
 			
 		} while (unvisited.size() > 0);
 		
-		pool.shutdown();
+		executor.shutdown();
 	}
 	
 	private static CompilationUnit parse(ICompilationUnit unit) {

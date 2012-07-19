@@ -62,13 +62,13 @@ public class TestVisitor extends ASTVisitor {
 						Type superclass= node.getSuperclassType();
 						if (superclass != null) { // if it extends any class
 							if (ASTHelper.isSubClassOf(node, "junit.framework.TestCase")) { // if it is a JUnit 3.x class
-								recorder.saveTestClazz(binding, ObjectType.JUNIT3);
+								recorder.saveTestClazz(node, binding, ObjectType.JUNIT3);
 								logger.debug("This is a junit 3 test class.");
 								return super.visit(node);																	
 							}
 						}
 						if (ASTHelper.isJunit4TestClass(binding) || model.hasTestAnnotation()) { // if it is a JUnit 4.x class
-							recorder.saveTestClazz(binding, ObjectType.JUNIT4);
+							recorder.saveTestClazz(node, binding, ObjectType.JUNIT4);
 							logger.debug("This is a junit 4 test class: " + binding.getQualifiedName());
 							return super.visit(node);
 						}
@@ -113,14 +113,14 @@ public class TestVisitor extends ASTVisitor {
 					if (model.isJUnit3TestClass()) { // if inside a JUnit 3.x test class
 						//TODO - only public void methods are test methods, others are just helpers
 						isTestMethod = true;
-						recorder.saveTestMethod(binding);
+						recorder.saveTestMethod(node, binding);
 						logger.debug("This is a junit 3 test method: " + binding.getName());					
 					}	
 					else if (model.isJUnit4TestClass()) { // if inside a JUnit 4.z test class						
 //						for (IAnnotationBinding annotation : binding.getAnnotations()) {						
 //							if ("org.junit.Test".equals(annotation.getAnnotationType().getQualifiedName())) { // if method is marked with @Test
 								isTestMethod = true;
-								recorder.saveTestMethod(binding);
+								recorder.saveTestMethod(node, binding);
 								logger.debug("This is a junit 4 test method: " + binding.getName());											
 //								for (IMemberValuePairBinding valuePair : annotation.getDeclaredMemberValuePairs()) {
 //									if ("expected".equals(valuePair.getName())) { // if JUnit 4.x test method expects an exception to be thrown
@@ -168,7 +168,7 @@ public class TestVisitor extends ASTVisitor {
 		try {
 			if (model.insideATestMethod()) { // if inside a JUnit test method
 				IMethodBinding binding = node.resolveMethodBinding();
-				recorder.visit(binding, node.arguments());
+				recorder.visit(node, binding, node.arguments());
 			}
 			else { // method call is happening outside any test method, ignore it
 				//TODO - test helper method have to be covered
@@ -196,7 +196,7 @@ public class TestVisitor extends ASTVisitor {
 		try {			
 			if (model.insideATestMethod()) { // if inside a JUnit test method
 				IMethodBinding binding = node.resolveMethodBinding();
-				recorder.visit(binding, node.arguments());
+				recorder.visit(node, binding, node.arguments());
 			}
 			else { // method call is happening outside any test method, ignore it
 				//TODO - test helper method have to be covered
@@ -223,7 +223,7 @@ public class TestVisitor extends ASTVisitor {
 				IMethodBinding binding = node.resolveConstructorBinding();
 				if (binding != null) {
 					List<Expression> arguments = node.arguments();				
-					recorder.saveMethodCall(binding, arguments);
+					recorder.saveMethodCall(node, binding, arguments);
 					logger.debug("Constructor invocation in test method: " + binding.getName());
 				}
 				else { // method call cannot be resolved, ignore it
@@ -255,7 +255,7 @@ public class TestVisitor extends ASTVisitor {
 		try {
 			if (model.insideATestMethod()) { // if inside a test method
 				IVariableBinding binding = node.resolveFieldBinding();
-				return recorder.visit(binding, true);
+				return recorder.visit(node, binding, true);
 			}
 			else { // field was accessed outside a test method, ignore it
 				//TODO - if it is used for initializing a field that is later used in a test method, then we should not ignore it
@@ -273,7 +273,7 @@ public class TestVisitor extends ASTVisitor {
 		try {
 			if (model.insideATestMethod()) { // if inside a test method
 				IVariableBinding binding = node.resolveFieldBinding();
-				return recorder.visit(binding, true);
+				return recorder.visit(node, binding, true);
 			}
 			else { // field was accessed outside a test method, ignore it
 				//TODO - if it is used for initializing a field that is later used in a test method, then we should not ignore it
@@ -294,7 +294,7 @@ public class TestVisitor extends ASTVisitor {
 				if (binding != null) {
 					if (binding.getKind() == IBinding.VARIABLE) { // if it is a local variable 
 						IVariableBinding variableBinding = (IVariableBinding) binding;
-						recorder.visit(variableBinding, false);
+						recorder.visit(node, variableBinding, false);
 					}				
 				}
 				else { // cannot resolve simple name, ignore it
@@ -322,7 +322,7 @@ public class TestVisitor extends ASTVisitor {
 				if (binding != null) {
 					if (binding.getKind() == IBinding.VARIABLE) { // if it is a field or local variable 
 						IVariableBinding variableBinding = (IVariableBinding) binding;
-						recorder.visit(variableBinding, false);
+						recorder.visit(node, variableBinding, false);
 					}				
 				}
 				else { // cannot resolve qualified name, ignore it
@@ -351,7 +351,7 @@ public class TestVisitor extends ASTVisitor {
 				if (binding != null) {
 					ITypeBinding variableType = binding.getType();
 					ITypeBinding declaringClass = binding.getDeclaringClass();
-					recorder.saveReference(variableName, variableType, declaringClass);
+					recorder.saveReference(node, variableName, variableType, declaringClass);
 					logger.debug("Variable declaration in test method: " + binding.getName());
 				}
 				else { // cannot resolve variable declaration, ignore it

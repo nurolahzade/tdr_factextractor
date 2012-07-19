@@ -3,6 +3,7 @@ package ca.ucalgary.cpsc.ase.factextractor.writer;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -37,12 +38,13 @@ public class DatabaseWriter extends TestRecorder {
 	 * Test class might already have been persisted.
 	 */
 	@Override
-	public void saveTestClazz(ITypeBinding binding, ObjectType type) {
+	public void saveTestClazz(ASTNode node, ITypeBinding binding, ObjectType type) {
 		String packageName = binding.getPackage().getName();
 		String className = binding.getName();
 		String fqn = binding.getQualifiedName();		
 		ClazzService clazzService = new ClazzService();
 		Clazz testClazz = clazzService.createOrGet(className, packageName, fqn, model.currentSourceFile(), type);
+		logPositionAndLength(node);
 		model.stepIntoClazz(testClazz);
 	}
 	
@@ -64,10 +66,11 @@ public class DatabaseWriter extends TestRecorder {
 	 * Persist test method. 
 	 */
 	@Override
-	public void saveTestMethod(IMethodBinding binding) {
+	public void saveTestMethod(ASTNode node, IMethodBinding binding) {
 		TestMethodService testMethodService = new TestMethodService();
 		TestMethod method = testMethodService.create(binding.getName(), model.currentClazz());
 		ITypeBinding[] exceptions = binding.getExceptionTypes();
+		logPositionAndLength(node);
 		model.stepIntoTestMethod(method);
 		saveXceptions(exceptions);
 	}
@@ -76,7 +79,7 @@ public class DatabaseWriter extends TestRecorder {
 	 * Persist method call.
 	 */
 	@Override
-	public void saveMethodCall(IMethodBinding binding, List<Expression> arguments) {
+	public void saveMethodCall(ASTNode node, IMethodBinding binding, List<Expression> arguments) {
 		ITypeBinding declaringClass = binding.getDeclaringClass();
 		Clazz clazz = loadClazz(declaringClass);
 		String methodName = binding.getName();
@@ -88,6 +91,7 @@ public class DatabaseWriter extends TestRecorder {
 		MethodService metthodService = new MethodService();
 		TestMethod testMethod = model.currentTestMethod();
 		Method method = metthodService.createOrGet(methodName, clazz, returnClazz, isConstructor, argumentCount, hash, testMethod, model.currentAssertion());
+		logPositionAndLength(node);
 		model.stepIntoInvocation(method);
 	}
 
@@ -117,26 +121,28 @@ public class DatabaseWriter extends TestRecorder {
 	 * Persist a reference to referenceType by (optional) name that is an attribute of (optional) declaringClass.
 	 */
 	@Override
-	public void saveReference(String name, ITypeBinding referenceType, ITypeBinding declaringClass) {
+	public void saveReference(ASTNode node, String name, ITypeBinding referenceType, ITypeBinding declaringClass) {
 		Clazz clazz = loadClazz(referenceType);
 		Clazz declaringClazz = null;
 		if (declaringClass != null) {
 			declaringClazz = loadClazz(declaringClass);			
 		}
 		ReferenceService service = new ReferenceService();
-		service.createOrGet(name, clazz, declaringClazz, model.currentTestMethod());		
+		service.createOrGet(name, clazz, declaringClazz, model.currentTestMethod());
+		logPositionAndLength(node);
 	}
 
 	/*
 	 * Persist assertion.
 	 */
 	@Override
-	public void saveAssertion(IMethodBinding binding) {
+	public void saveAssertion(ASTNode node, IMethodBinding binding) {
 		String name = binding.getName();
 		AssertionType type = AssertionType.getType(name);
 		TestMethod testMethod = model.currentTestMethod();
 		AssertionService service = new AssertionService();
 		Assertion assertion = service.createOrGet(type, testMethod);
+		logPositionAndLength(node);
 		model.stepIntoInvocation(assertion);
 		model.stepIntoAssertion(assertion);
 	}
@@ -145,5 +151,9 @@ public class DatabaseWriter extends TestRecorder {
 	public SourceModel getModel() {
 		return model;
 	}
-			
+	
+	protected void logPositionAndLength(ASTNode node) {
+		System.out.println("Node: " + ASTNode.nodeClassForType(node.getNodeType()).getName() + " start: " + node.getStartPosition() + " length: " + node.getLength());
+	}
+	
 }
