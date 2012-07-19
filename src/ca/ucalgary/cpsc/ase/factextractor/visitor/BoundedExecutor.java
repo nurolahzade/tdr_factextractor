@@ -20,7 +20,6 @@ public class BoundedExecutor {
     private String root;
     private final Semaphore semaphore;
     private Set<Integer> commands; 
-    private RepositoryFileService repositoryService;
     
 	private static Logger logger = Logger.getLogger(BoundedExecutor.class);
     
@@ -29,7 +28,6 @@ public class BoundedExecutor {
     	this.pool = Executors.newFixedThreadPool(10);
         this.semaphore = new Semaphore(bound);
         this.commands = Collections.synchronizedSet(new HashSet<Integer>());
-		this.repositoryService = new RepositoryFileService();
     }
 
     public void submit(final RepositoryFile file)
@@ -50,7 +48,8 @@ public class BoundedExecutor {
                     	logger.warn("Could not index file: " + file.getPath(), t);
                     	logger.debug("Indexed file: " + file.getPath());
                     } finally {                		
-                		repositoryService.visit(file);
+                    	RepositoryFileService repositoryService = new RepositoryFileService();
+                    	repositoryService.visit(file);
                     	commands.remove(file.getId());
                         semaphore.release();                        
                     }
