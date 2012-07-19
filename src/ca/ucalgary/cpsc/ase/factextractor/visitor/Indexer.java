@@ -32,9 +32,6 @@ public class Indexer {
 		CompilationUnit cu = PPAUtil.getCU(new File(root + file.getPath()), new PPAOptions());
 		TestVisitor visitor = new TestVisitor(new DatabaseWriter(model));
 		cu.accept(visitor);
-		
-		RepositoryFileService repositoryService = new RepositoryFileService();
-		repositoryService.visit(file);
 	}
 	
 }

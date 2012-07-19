@@ -1,8 +1,6 @@
 package ca.ucalgary.cpsc.ase.factextractor;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.log4j.Logger;

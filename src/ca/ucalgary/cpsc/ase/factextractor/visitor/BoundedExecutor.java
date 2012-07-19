@@ -9,19 +9,27 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 
+import org.apache.log4j.Logger;
+
 import ca.ucalgary.cpsc.ase.FactManager.entity.RepositoryFile;
+import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
+import ca.ucalgary.cpsc.ase.factextractor.Application;
 
 public class BoundedExecutor {
     private final ExecutorService pool;
     private String root;
     private final Semaphore semaphore;
     private Set<Integer> commands; 
+    private RepositoryFileService repositoryService;
+    
+	private static Logger logger = Logger.getLogger(BoundedExecutor.class);
     
     public BoundedExecutor(String path, int bound) {
 		this.root = path;
     	this.pool = Executors.newFixedThreadPool(10);
         this.semaphore = new Semaphore(bound);
         this.commands = Collections.synchronizedSet(new HashSet<Integer>());
+		this.repositoryService = new RepositoryFileService();
     }
 
     public void submit(final RepositoryFile file)
@@ -37,8 +45,12 @@ public class BoundedExecutor {
             pool.execute(new Runnable() {
                 public void run() {
                     try {
-                    	new Indexer(root, file).run();                    		
-                    } finally {
+                    	new Indexer(root, file).run();
+                    } catch (Throwable t) {
+                    	logger.warn("Could not index file: " + file.getPath(), t);
+                    	logger.debug("Indexed file: " + file.getPath());
+                    } finally {                		
+                		repositoryService.visit(file);
                     	commands.remove(file.getId());
                         semaphore.release();                        
                     }

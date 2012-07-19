@@ -153,7 +153,7 @@ public class DatabaseWriter extends TestRecorder {
 	}
 	
 	protected void logPositionAndLength(ASTNode node) {
-		System.out.println("Node: " + ASTNode.nodeClassForType(node.getNodeType()).getName() + " start: " + node.getStartPosition() + " length: " + node.getLength());
+//		System.out.println("Node: " + ASTNode.nodeClassForType(node.getNodeType()).getName() + " start: " + node.getStartPosition() + " length: " + node.getLength());
 	}
 	
 }
