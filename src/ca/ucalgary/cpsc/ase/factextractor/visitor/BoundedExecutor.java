@@ -25,7 +25,7 @@ public class BoundedExecutor {
     
     public BoundedExecutor(String path, int bound) {
 		this.root = path;
-    	this.pool = Executors.newFixedThreadPool(10);
+    	this.pool = Executors.newFixedThreadPool(bound);
         this.semaphore = new Semaphore(bound);
         this.commands = Collections.synchronizedSet(new HashSet<Integer>());
     }
