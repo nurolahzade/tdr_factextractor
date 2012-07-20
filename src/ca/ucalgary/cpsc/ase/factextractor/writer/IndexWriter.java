@@ -23,15 +23,15 @@ import ca.ucalgary.cpsc.ase.FactManager.service.XceptionService;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.ASTHelper;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 
-public class DatabaseWriter extends TestRecorder {
+public class IndexWriter extends TestRecorder {
 	
 	protected SourceModel model;
 	
-	public DatabaseWriter(SourceModel model) {
+	public IndexWriter(SourceModel model) {
 		this.model = model;
 	}
 	
-	private static Logger logger = Logger.getLogger(DatabaseWriter.class);	
+	private static Logger logger = Logger.getLogger(IndexWriter.class);	
 
 	/*
 	 * Persist test class as a JUnit 3.x or JUnit 4.x test class.
@@ -44,7 +44,7 @@ public class DatabaseWriter extends TestRecorder {
 		String fqn = binding.getQualifiedName();		
 		ClazzService clazzService = new ClazzService();
 		Clazz testClazz = clazzService.createOrGet(className, packageName, fqn, model.currentSourceFile(), type);
-		logPositionAndLength(node);
+//		logPositionAndLength(node);
 		model.stepIntoClazz(testClazz);
 	}
 	

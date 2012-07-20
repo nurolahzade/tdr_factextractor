@@ -30,7 +30,7 @@ import ca.ucalgary.cpsc.ase.factextractor.visitor.BoundedExecutor;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.Indexer;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
-import ca.ucalgary.cpsc.ase.factextractor.writer.DatabaseWriter;
+import ca.ucalgary.cpsc.ase.factextractor.writer.IndexWriter;
 
 public class Application implements IApplication {
 	
@@ -85,7 +85,7 @@ public class Application implements IApplication {
 								
 								// Now create the AST for the ICompilationUnits
 								CompilationUnit parse = parse(unit);
-								TestVisitor visitor = new TestVisitor(new DatabaseWriter(model));
+								TestVisitor visitor = new TestVisitor(new IndexWriter(model));
 								parse.accept(visitor);
 							}
 						}

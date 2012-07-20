@@ -10,7 +10,7 @@ import ca.ucalgary.cpsc.ase.FactManager.entity.RepositoryFile;
 import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
-import ca.ucalgary.cpsc.ase.factextractor.writer.DatabaseWriter;
+import ca.ucalgary.cpsc.ase.factextractor.writer.IndexWriter;
 
 public class Indexer {
 	
@@ -30,7 +30,7 @@ public class Indexer {
 		model.stepIntoSourceFile(source);
 		
 		CompilationUnit cu = PPAUtil.getCU(new File(root + file.getPath()), new PPAOptions());
-		TestVisitor visitor = new TestVisitor(new DatabaseWriter(model));
+		TestVisitor visitor = new TestVisitor(new IndexWriter(model));
 		cu.accept(visitor);
 	}
 	
