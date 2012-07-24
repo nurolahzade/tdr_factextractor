@@ -13,10 +13,12 @@ import ca.ucalgary.cpsc.ase.FactManager.entity.AssertionType;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Method;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
+import ca.ucalgary.cpsc.ase.FactManager.entity.Position;
 import ca.ucalgary.cpsc.ase.FactManager.entity.TestMethod;
 import ca.ucalgary.cpsc.ase.FactManager.service.AssertionService;
 import ca.ucalgary.cpsc.ase.FactManager.service.ClazzService;
 import ca.ucalgary.cpsc.ase.FactManager.service.MethodService;
+import ca.ucalgary.cpsc.ase.FactManager.service.PositionService;
 import ca.ucalgary.cpsc.ase.FactManager.service.ReferenceService;
 import ca.ucalgary.cpsc.ase.FactManager.service.TestMethodService;
 import ca.ucalgary.cpsc.ase.FactManager.service.XceptionService;
@@ -141,8 +143,7 @@ public class IndexWriter extends TestRecorder {
 		AssertionType type = AssertionType.getType(name);
 		TestMethod testMethod = model.currentTestMethod();
 		AssertionService service = new AssertionService();
-		Assertion assertion = service.createOrGet(type, testMethod);
-		logPositionAndLength(node);
+		Assertion assertion = service.createOrGet(type, testMethod, getPosition(node));
 		model.stepIntoInvocation(assertion);
 		model.stepIntoAssertion(assertion);
 	}
@@ -152,8 +153,9 @@ public class IndexWriter extends TestRecorder {
 		return model;
 	}
 	
-	protected void logPositionAndLength(ASTNode node) {
-//		System.out.println("Node: " + ASTNode.nodeClassForType(node.getNodeType()).getName() + " start: " + node.getStartPosition() + " length: " + node.getLength());
+	protected Position getPosition(ASTNode node) {
+		PositionService service = new PositionService();
+		return service.create(node.getStartPosition(), node.getLength());
 	}
 	
 }
