@@ -70,9 +70,8 @@ public class IndexWriter extends TestRecorder {
 	@Override
 	public void saveTestMethod(ASTNode node, IMethodBinding binding) {
 		TestMethodService testMethodService = new TestMethodService();
-		TestMethod method = testMethodService.create(binding.getName(), model.currentClazz());
+		TestMethod method = testMethodService.create(binding.getName(), model.currentClazz(), getPosition(node));
 		ITypeBinding[] exceptions = binding.getExceptionTypes();
-		logPositionAndLength(node);
 		model.stepIntoTestMethod(method);
 		saveXceptions(exceptions);
 	}
@@ -92,8 +91,8 @@ public class IndexWriter extends TestRecorder {
 		
 		MethodService metthodService = new MethodService();
 		TestMethod testMethod = model.currentTestMethod();
-		Method method = metthodService.createOrGet(methodName, clazz, returnClazz, isConstructor, argumentCount, hash, testMethod, model.currentAssertion());
-		logPositionAndLength(node);
+		Method method = metthodService.createOrGet(methodName, clazz, returnClazz, isConstructor, 
+				argumentCount, hash, testMethod, model.currentAssertion(), getPosition(node));
 		model.stepIntoInvocation(method);
 	}
 
@@ -130,8 +129,7 @@ public class IndexWriter extends TestRecorder {
 			declaringClazz = loadClazz(declaringClass);			
 		}
 		ReferenceService service = new ReferenceService();
-		service.createOrGet(name, clazz, declaringClazz, model.currentTestMethod());
-		logPositionAndLength(node);
+		service.createOrGet(name, clazz, declaringClazz, model.currentTestMethod(), getPosition(node));
 	}
 
 	/*
