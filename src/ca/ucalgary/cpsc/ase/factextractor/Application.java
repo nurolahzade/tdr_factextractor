@@ -99,7 +99,7 @@ public class Application implements IApplication {
 	}
 	
 	private void iterateFileSystem(String path) {
-		BoundedExecutor executor = new BoundedExecutor(path, 4);
+		BoundedExecutor executor = new BoundedExecutor(path, 10);
 				
 		RepositoryFileService repositoryService = new RepositoryFileService();
 		List<RepositoryFile> unvisited;
