@@ -2,6 +2,7 @@ package ca.ucalgary.cpsc.ase.factextractor.visitor;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -37,12 +38,14 @@ public class ThreadPoolMonitor extends Thread {
 	@Override
 	public void run() {
 		while (loop) {
-			for (Entry<Integer, Monitor> entry : tasks.entrySet()) {
+			Iterator iterator = tasks.entrySet().iterator();
+			while (iterator.hasNext()) {
+				Entry<Integer, Monitor> entry = (Entry<Integer, Monitor>) iterator.next();
 				Monitor monitor = entry.getValue();
 				if (monitor != null && monitor.isRunning() && isTimedOut(monitor)) {
 					monitor.timeout();
 					System.out.println("ThreadPoolMonitor.timeout: " + entry.getKey());
-					unregister(entry.getKey());
+					iterator.remove();
 				}
 			}
 			try {
