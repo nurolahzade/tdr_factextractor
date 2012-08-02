@@ -40,15 +40,15 @@ public class BoundedExecutor {
         try {
         	final Future<?> future = pool.submit(new Runnable() {
                 public void run() {
+                	RepositoryFileService repositoryService = new RepositoryFileService();
                     try {
                     	new Indexer(root, file).run();
+                    	repositoryService.visit(file);
                     	logger.debug("Indexed: " + file.getPath());
                     } catch (Throwable t) {
-                    	// TODO create a SKIPPED state for RepositoryFile.visited attribute
+                    	repositoryService.skip(file);
                     	logger.warn("Exception when indexing: " + file.getPath(), t);
                     } finally {                		
-                    	RepositoryFileService repositoryService = new RepositoryFileService();
-                    	repositoryService.visit(file);
                     	poolMonitor.unregister(file.getId());
                         semaphore.release();                                	
                     }
