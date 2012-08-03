@@ -22,17 +22,14 @@ public class ThreadPoolMonitor extends Thread {
 	
 	public void preregister(Integer id) {
 		tasks.put(id, null);
-		System.out.println("ThreadPoolMonitor.preregister: " + id);
 	}
 	
 	public void register(Integer id, Monitor monitor) {
 		tasks.put(id, monitor);
-		System.out.println("ThreadPoolMonitor.register: " + id);
 	}
 	
 	public void unregister(Integer id) {
 		tasks.remove(id);
-		System.out.println("ThreadPoolMonitor.unregister: " + id);
 	}
 
 	@Override
@@ -44,7 +41,6 @@ public class ThreadPoolMonitor extends Thread {
 				Monitor monitor = entry.getValue();
 				if (monitor != null && monitor.isRunning() && isTimedOut(monitor)) {
 					monitor.timeout();
-					System.out.println("ThreadPoolMonitor.timeout: " + entry.getKey());
 					iterator.remove();
 				}
 			}
