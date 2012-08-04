@@ -2,8 +2,6 @@ package ca.ucalgary.cpsc.ase.factextractor.dump;
 
 import java.io.File;
 
-import org.eclipse.jdt.internal.codeassist.RelevanceConstants;
-
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 
 public class JavaSourceVisitor extends FileSystemVisitor {

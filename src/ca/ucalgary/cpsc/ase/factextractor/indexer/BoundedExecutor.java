@@ -1,4 +1,4 @@
-package ca.ucalgary.cpsc.ase.factextractor.visitor;
+package ca.ucalgary.cpsc.ase.factextractor.indexer;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import ca.mcgill.cs.swevo.ppa.util.PPACoreSingleton;
 import ca.ucalgary.cpsc.ase.FactManager.entity.RepositoryFile;
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 
@@ -24,8 +25,17 @@ public class BoundedExecutor {
 		this.root = path;
     	this.pool = Executors.newFixedThreadPool(bound);
         this.semaphore = new Semaphore(bound);
-        this.poolMonitor = new ThreadPoolMonitor(3 * 60, TimeUnit.SECONDS);
-        poolMonitor.start();
+        initPPAEngine(bound);
+        initThreadPoolMonitor();
+    }
+    
+    private void initPPAEngine(int size) {
+    	PPACoreSingleton.getInstance(size, PPACoreSingleton.DEFAULT_PROJECT_NAME);
+    }
+    
+    private void initThreadPoolMonitor() {
+        poolMonitor = new ThreadPoolMonitor(3 * 60, TimeUnit.SECONDS);
+        poolMonitor.start();    	
     }
 
     public void submit(final RepositoryFile file)

@@ -7,7 +7,8 @@ public class DumpFilter {
 			System.out.println("Usage: DumpIndexer <path>");
 			System.exit(0);
 		}
-		JavaSourceVisitor sourceVisitor = new JavaSourceVisitor(args[0]);
+		
+		new JavaSourceVisitor(args[0]);
 	}	
 
 }

@@ -26,8 +26,8 @@ import ca.ucalgary.cpsc.ase.FactManager.service.ProjectService;
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
 import ca.ucalgary.cpsc.ase.factextractor.composer.QueryGeneratorTest;
-import ca.ucalgary.cpsc.ase.factextractor.visitor.BoundedExecutor;
-import ca.ucalgary.cpsc.ase.factextractor.visitor.Indexer;
+import ca.ucalgary.cpsc.ase.factextractor.indexer.BoundedExecutor;
+import ca.ucalgary.cpsc.ase.factextractor.indexer.Indexer;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
 import ca.ucalgary.cpsc.ase.factextractor.writer.IndexWriter;
@@ -99,7 +99,7 @@ public class Application implements IApplication {
 	}
 	
 	private void iterateFileSystem(String path) {
-		BoundedExecutor executor = new BoundedExecutor(path, 10);
+		BoundedExecutor executor = new BoundedExecutor(path, 24);
 				
 		RepositoryFileService repositoryService = new RepositoryFileService();
 		List<RepositoryFile> unvisited;
@@ -134,8 +134,7 @@ public class Application implements IApplication {
 
 	@Override
 	public void stop() {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub		
 	}
 
 }

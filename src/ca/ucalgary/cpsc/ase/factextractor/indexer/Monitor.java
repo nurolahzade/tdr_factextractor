@@ -1,4 +1,4 @@
-package ca.ucalgary.cpsc.ase.factextractor.visitor;
+package ca.ucalgary.cpsc.ase.factextractor.indexer;
 
 import java.util.concurrent.Future;
 

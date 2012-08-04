@@ -1,14 +1,17 @@
-package ca.ucalgary.cpsc.ase.factextractor.visitor;
+package ca.ucalgary.cpsc.ase.factextractor.indexer;
 
 import java.io.File;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import ca.mcgill.cs.swevo.ppa.PPAOptions;
-import ca.mcgill.cs.swevo.ppa.ui.PPAUtil;
+import ca.mcgill.cs.swevo.ppa.util.PPACoreUtil;
 import ca.ucalgary.cpsc.ase.FactManager.entity.RepositoryFile;
 import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
+import ca.ucalgary.cpsc.ase.factextractor.visitor.VisitorException;
 import ca.ucalgary.cpsc.ase.factextractor.writer.IndexWriter;
 
 public class Indexer {
@@ -29,7 +32,7 @@ public class Indexer {
 		model.stepIntoSourceFile(source);
 		CompilationUnit cu = null;
 		try {
-			cu = PPAUtil.getCU(new File(root + file.getPath()), new PPAOptions());			
+			cu = PPACoreUtil.getCU(new File(root + file.getPath()), new PPAOptions());			
 		} catch (Throwable t) {
 			throw new PPAException(t);
 		}

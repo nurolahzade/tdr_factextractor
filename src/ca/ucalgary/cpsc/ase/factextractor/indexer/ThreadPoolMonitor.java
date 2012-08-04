@@ -1,4 +1,4 @@
-package ca.ucalgary.cpsc.ase.factextractor.visitor;
+package ca.ucalgary.cpsc.ase.factextractor.indexer;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+
 
 public class ThreadPoolMonitor extends Thread {
 
