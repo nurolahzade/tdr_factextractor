@@ -37,9 +37,9 @@ public class ThreadPoolMonitor extends Thread {
 	@Override
 	public void run() {
 		while (loop) {
-			Set<Entry<Integer, Monitor>> keys = tasks.entrySet();
+			Set<Entry<Integer, Monitor>> entries = tasks.entrySet();
 			synchronized (tasks) {
-				Iterator iterator = keys.iterator();
+				Iterator iterator = entries.iterator();
 				while (iterator.hasNext()) {
 					Entry<Integer, Monitor> entry = (Entry<Integer, Monitor>) iterator.next();
 					Monitor monitor = entry.getValue();
