@@ -39,9 +39,9 @@ public class ThreadPoolMonitor extends Thread {
 		while (loop) {
 			Set<Entry<Integer, Monitor>> entries = tasks.entrySet();
 			synchronized (tasks) {
-				Iterator iterator = entries.iterator();
+				Iterator<Entry<Integer, Monitor>> iterator = entries.iterator();
 				while (iterator.hasNext()) {
-					Entry<Integer, Monitor> entry = (Entry<Integer, Monitor>) iterator.next();
+					Entry<Integer, Monitor> entry = iterator.next();
 					Monitor monitor = entry.getValue();
 					if (monitor != null && monitor.isRunning() && isTimedOut(monitor)) {
 						monitor.timeout();
