@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
@@ -36,14 +37,17 @@ public class ThreadPoolMonitor extends Thread {
 	@Override
 	public void run() {
 		while (loop) {
-			Iterator iterator = tasks.entrySet().iterator();
-			while (iterator.hasNext()) {
-				Entry<Integer, Monitor> entry = (Entry<Integer, Monitor>) iterator.next();
-				Monitor monitor = entry.getValue();
-				if (monitor != null && monitor.isRunning() && isTimedOut(monitor)) {
-					monitor.timeout();
-					iterator.remove();
-				}
+			Set<Entry<Integer, Monitor>> keys = tasks.entrySet();
+			synchronized (tasks) {
+				Iterator iterator = keys.iterator();
+				while (iterator.hasNext()) {
+					Entry<Integer, Monitor> entry = (Entry<Integer, Monitor>) iterator.next();
+					Monitor monitor = entry.getValue();
+					if (monitor != null && monitor.isRunning() && isTimedOut(monitor)) {
+						monitor.timeout();
+						iterator.remove();
+					}
+				}				
 			}
 			try {
 				sleep(100);
