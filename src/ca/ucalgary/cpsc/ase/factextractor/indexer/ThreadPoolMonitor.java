@@ -16,7 +16,7 @@ public class ThreadPoolMonitor extends Thread {
 	private Map<Integer, Monitor> tasks; 
 	
 	public ThreadPoolMonitor(long timeout, TimeUnit unit) {
-		super();
+		super("ThreadPool Monitor");
 		loop = true;
 		this.timeout = unit.toMillis(timeout);
 		this.tasks = Collections.synchronizedMap(new HashMap<Integer, Monitor>());
