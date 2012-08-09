@@ -32,7 +32,7 @@ public class Indexer {
 		model.stepIntoSourceFile(source);
 		CompilationUnit cu = null;
 		try {
-			cu = PPACoreUtil.getCU(new File(root + file.getPath()), new PPAOptions());			
+			cu = PPACoreUtil.getCU(new File(root + file.getPath()), new PPAOptions(), Thread.currentThread().getName(), true);			
 		} catch (Throwable t) {
 			throw new PPAException(t);
 		}
