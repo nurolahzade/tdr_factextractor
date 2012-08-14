@@ -5,7 +5,8 @@ import java.io.File;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import ca.mcgill.cs.swevo.ppa.PPAOptions;
-import ca.mcgill.cs.swevo.ppa.ui.PPAUtil;
+import ca.mcgill.cs.swevo.ppa.util.PPACoreSingleton;
+import ca.mcgill.cs.swevo.ppa.util.PPACoreUtil;
 import ca.ucalgary.cpsc.ase.QueryManager.Query;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.QueryModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
@@ -13,8 +14,12 @@ import ca.ucalgary.cpsc.ase.factextractor.writer.QueryWriter;
 
 public class QueryGenerator {
 	
+	public QueryGenerator() {
+		PPACoreSingleton.getInstance();
+	}
+	
 	public Query generate(String code) {
-		CompilationUnit cu = PPAUtil.getCU(code, new PPAOptions());
+		CompilationUnit cu = PPACoreUtil.getCU(code, new PPAOptions(), "Query Test");
 		return generate(cu);
 	}
 
@@ -26,7 +31,7 @@ public class QueryGenerator {
 	}
 	
 	public Query generate(File file) {
-		CompilationUnit cu = PPAUtil.getCU(file, new PPAOptions());
+		CompilationUnit cu = PPACoreUtil.getCU(file, new PPAOptions(), "Query Test", true);
 		return generate(cu);		
 	}
 
