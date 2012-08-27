@@ -146,7 +146,8 @@ public class QueryModel implements Model {
 
 	@Override
 	public boolean insideAnAssertion() {
-		return currentInvocation() instanceof QueryAssertion;	
+//		return currentInvocation() instanceof QueryAssertion;	
+		return currentAssertion() != null;
 	}
 
 	@Override
