@@ -77,14 +77,20 @@ public class ASTHelper {
 	
 	/*
 	 * Checks if this method is a JUnit 3.x or 4.x Assert method.
-	 * A method is a JUnit 3.x assertion if it belongs to junit.framework.Assert class.
-	 * A method is a JUnit 4.x assertion if it belongs to org.junit.Assert class.
 	 */
-	public static boolean isJunitAssertion(IMethodBinding binding) {
+	public static boolean isJunitAssertion(IMethodBinding binding, Model model) {
 		String fqn = binding.getDeclaringClass().getQualifiedName();
 		String name = binding.getName();
-		return "junit.framework.Assert".equals(fqn) || "org.junit.Assert".equals(fqn) || (
-				"junit.framework.TestCase".equals(fqn) && (name.startsWith("assert") || name.startsWith("fail")));
+		return (model.isJUnit3TestClass() && isJunit3Assertion(fqn)) ||
+			(model.isJUnit4TestClass() && isJunit4Assertion(name));
+	}
+	
+	public static boolean isJunit3Assertion(String fqn) {
+		return "junit.framework.Assert".equals(fqn) || "org.junit.Assert".equals(fqn);		
+	}
+	
+	public static boolean isJunit4Assertion(String name) {
+		return name.startsWith("assert") || name.startsWith("fail");
 	}
 	
 	/*

@@ -59,7 +59,7 @@ public abstract class TestRecorder {
 	
 	public boolean visit(ASTNode node, IMethodBinding binding, List<Expression> arguments) {
 		if (binding != null) {
-			if (ASTHelper.isJunitAssertion(binding)) { // if this is an Assert method call
+			if (ASTHelper.isJunitAssertion(binding, getModel())) { // if this is an Assert method call
 				if (getModel().insideAnAssertion()) { // nested assertions are not allowed
 					logger.error("New assertion reached while assertion flag is on.");
 				}
