@@ -81,15 +81,20 @@ public class ASTHelper {
 	public static boolean isJunitAssertion(IMethodBinding binding, Model model) {
 		String fqn = binding.getDeclaringClass().getQualifiedName();
 		String name = binding.getName();
-		return (model.isJUnit3TestClass() && isJunit3Assertion(fqn)) ||
+		return (model.isJUnit3TestClass() && isJunit3Assertion(name, fqn)) ||
 			(model.isJUnit4TestClass() && isJunit4Assertion(name));
 	}
 	
-	public static boolean isJunit3Assertion(String fqn) {
-		return "junit.framework.Assert".equals(fqn) || "org.junit.Assert".equals(fqn);		
+	public static boolean isJunit3Assertion(String name, String fqn) {
+		return "junit.framework.Assert".equals(fqn) || "org.junit.Assert".equals(fqn)
+			|| ("junit.framework.TestCase".equals(fqn) && isAssertMethod(name));		
 	}
 	
 	public static boolean isJunit4Assertion(String name) {
+		return isAssertMethod(name);
+	}
+	
+	private static boolean isAssertMethod(String name) {
 		return name.startsWith("assert") || name.startsWith("fail");
 	}
 	
