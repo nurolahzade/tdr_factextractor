@@ -11,6 +11,7 @@ import ca.ucalgary.cpsc.ase.FactManager.service.TestMethodService;
 import ca.ucalgary.cpsc.ase.QueryManager.Heuristic;
 import ca.ucalgary.cpsc.ase.QueryManager.Query;
 import ca.ucalgary.cpsc.ase.QueryManager.VotingHeuristicManager;
+import ca.ucalgary.cpsc.ase.QueryManager.VotingResult;
 import ca.ucalgary.cpsc.ase.factextractor.composer.QueryGenerator;
 
 public class QueryGeneratorTest {
@@ -35,23 +36,24 @@ public class QueryGeneratorTest {
 		System.out.println(query);
 
 		VotingHeuristicManager manager = new VotingHeuristicManager();
-		Map<Integer, Set<Heuristic>> results = manager.match(query);
+		Map<Integer, VotingResult> results = manager.match(query);
 		
 		print(results);
 	}
 
-	private void print(Map<Integer, Set<Heuristic>> results) {
+	private void print(Map<Integer, VotingResult> results) {
 		TestMethodService service = new TestMethodService();
 		for (Integer id : results.keySet()) {
+			VotingResult result = results.get(id);
 			TestMethod tm = service.find(id);
-			System.out.println(id + ", " + tm.getClazz().getFqn() + "." + tm.getName() + "(), " + generateHeuristics(results.get(id)));
+			System.out.println("id=[" + id + "], score=[" + result.getScore() + "], " + tm.getClazz().getFqn() + "." + tm.getName() + "(), " + generateHeuristics(result));
 		}
 	}
 	
-	private String generateHeuristics(Set<Heuristic> heuristics) {
+	private String generateHeuristics(VotingResult result) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("{");
-		for (Heuristic heuristic : heuristics) {
+		for (Heuristic heuristic : result.getHeuristics()) {
 			builder.append(heuristic.getName());
 			builder.append(", ");
 		}
