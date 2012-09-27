@@ -23,15 +23,19 @@ public class ThreadPoolMonitor extends Thread {
 	}
 	
 	public void preregister(Integer id) {
-		tasks.put(id, null);
+		register(id, null);
 	}
 	
 	public void register(Integer id, Monitor monitor) {
-		tasks.put(id, monitor);
+		synchronized (tasks) {
+			tasks.put(id, monitor);			
+		}
 	}
 	
 	public void unregister(Integer id) {
-		tasks.remove(id);
+		synchronized (tasks) {
+			tasks.remove(id);			
+		}
 	}
 
 	@Override
@@ -62,7 +66,9 @@ public class ThreadPoolMonitor extends Thread {
 	}
 
 	public boolean isRegistered(Integer id) {
-		return tasks.keySet().contains(id);
+		synchronized (tasks) {
+			return tasks.keySet().contains(id);			
+		}
 	}
 	
 	public void shutdown() {
