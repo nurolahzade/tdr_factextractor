@@ -8,12 +8,10 @@ Bundle-Vendor: Mehrdad Nurolahzade
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.core;bundle-version="3.6.2",
  org.eclipse.core.resources;bundle-version="3.6.1",
- ca.mcgill.cs.swevo.ppa.ui;bundle-version="1.2.1"
+ ca.mcgill.cs.swevo.ppa.ui;bundle-version="1.2.1",
+ ca.ucalgary.cpsc.ase.FactManager;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/log4j-1.2.16.jar,
  .
-Import-Package: ca.ucalgary.cpsc.ase.FactManager.entity,
- ca.ucalgary.cpsc.ase.FactManager.service,
- ca.ucalgary.cpsc.ase.QueryManager,
- ca.ucalgary.cpsc.ase.QueryManager.query
+Export-Package: ca.ucalgary.cpsc.ase.factextractor.composer
