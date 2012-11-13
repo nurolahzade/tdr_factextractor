@@ -2,12 +2,11 @@ package ca.ucalgary.cpsc.ase.factextractor.composer;
 
 import java.io.File;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.TestMethod;
-import ca.ucalgary.cpsc.ase.FactManager.service.TestMethodService;
+import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
+import ca.ucalgary.cpsc.ase.FactManager.service.ClazzService;
 import ca.ucalgary.cpsc.ase.QueryManager.Heuristic;
 import ca.ucalgary.cpsc.ase.QueryManager.Query;
 import ca.ucalgary.cpsc.ase.QueryManager.VotingHeuristicManager;
@@ -42,12 +41,12 @@ public class QueryGeneratorTest {
 	}
 
 	private void print(Map<Integer, VotingResult> results) {
-		TestMethodService service = new TestMethodService();
+		ClazzService service = new ClazzService();
 		for (Integer id : results.keySet()) {
 			VotingResult result = results.get(id);
-			TestMethod tm = service.find(id);
+			Clazz c = service.find(id);
 			System.out.println("id=" + id + " score=" + result.getScore() + " " + 
-					tm.getClazz().getFqn() + "." + tm.getName() + "() " + generateHeuristics(result));
+					c.getFqn() + generateHeuristics(result));
 		}
 	}
 	
