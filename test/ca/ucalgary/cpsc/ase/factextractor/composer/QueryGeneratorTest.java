@@ -45,14 +45,16 @@ public class QueryGeneratorTest {
 		for (Integer id : results.keySet()) {
 			VotingResult result = results.get(id);
 			Clazz c = service.find(id);
-			System.out.println("id=" + id + " score=" + result.getScore() + " " + 
-					c.getFqn() + generateHeuristics(result));
+			System.out.println("id=" + id + " rank=" + result.getRank() + 
+					" score=" + result.getScore() + 
+					" fqn=" + c.getFqn() + 
+					generateHeuristics(result));
 		}
 	}
 	
 	private String generateHeuristics(VotingResult result) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("heuristics={");
+		builder.append(" heuristics={");
 		for (Heuristic heuristic : result.getHeuristics()) {
 			builder.append(heuristic.getName());
 			builder.append(":");
