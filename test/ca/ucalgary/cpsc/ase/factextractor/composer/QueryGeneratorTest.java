@@ -1,6 +1,8 @@
 package ca.ucalgary.cpsc.ase.factextractor.composer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -17,49 +19,65 @@ public class QueryGeneratorTest {
 	
 	private static Logger logger = Logger.getLogger(QueryGeneratorTest.class);
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.out.println("Usage: QueryGeneratorTest <path>");
 			System.exit(0);
 		}
 		QueryGeneratorTest test = new QueryGeneratorTest();
-		test.testQueryTestFile(args[0]);
+		test.runQueryTestFile(new File(args[0]));
 	}
 	
-	public void testQueryTestFile(String path) throws Exception {
-		File file = new File(path);
-						
+	public void runQueryTestFile(File input) {
 		QueryGenerator generator = new QueryGenerator();
-		Query query = generator.generate(file);
+		Query query = generator.generate(input);
 		
-		System.out.println(query);
+		File output = new File(input.getParent(), input.getName().replaceFirst(".java$", ".txt"));
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(output);
+		} catch (FileNotFoundException e) {
+			logger.error(e);
+			return;
+		} 
+		
+		writer.println(query);
+		
+		try {
+			VotingHeuristicManager manager = new VotingHeuristicManager();
+			Map<Integer, VotingResult> results = manager.match(query);
+			print(writer, results);
+		} catch (Exception e) {
+			e.printStackTrace(writer);
+			logger.error(e);
+		}
 
-		VotingHeuristicManager manager = new VotingHeuristicManager();
-		Map<Integer, VotingResult> results = manager.match(query);
-		
-		print(results);
+		writer.close();
 	}
 
-	private void print(Map<Integer, VotingResult> results) {
+	private void print(PrintWriter writer, Map<Integer, VotingResult> results) {
 		ClazzService service = new ClazzService();
 		for (Integer id : results.keySet()) {
 			VotingResult result = results.get(id);
 			Clazz c = service.find(id);
-			System.out.println("id=" + id + " rank=" + result.getRank() + 
-					" score=" + result.getScore() + 
-					" fqn=" + c.getFqn() + 
-					generateHeuristics(result));
+			writer.println("id=" + id + " rank=" + result.getRank() + 
+					" score=" + String.format("%.3f", result.getScore()) + 
+					" fqn=" + c.getFqn() + generateHeuristics(result));
 		}
 	}
 	
 	private String generateHeuristics(VotingResult result) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(" heuristics={");
+		int total = result.getHeuristics().size();
+		int counter = 0;
 		for (Heuristic heuristic : result.getHeuristics()) {
 			builder.append(heuristic.getName());
 			builder.append(":");
-			builder.append(result.getScore(heuristic));
-			builder.append(", ");
+			builder.append(String.format("%.3f", result.getScore(heuristic)));
+			if (++counter < total) {
+				builder.append(", ");				
+			}
 		}
 		builder.append("}");
 		return builder.toString();

@@ -1,5 +1,7 @@
 package ca.ucalgary.cpsc.ase.factextractor.dump;
 
+import java.io.File;
+
 public class DumpFilter {
 
 	public static void main(String[] args) {
@@ -8,7 +10,7 @@ public class DumpFilter {
 			System.exit(0);
 		}
 		
-		new JavaSourceVisitor(args[0]);
+		new RepositoryVisitor(new File(args[0]));
 	}	
 
 }

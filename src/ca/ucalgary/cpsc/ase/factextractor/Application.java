@@ -1,5 +1,6 @@
 package ca.ucalgary.cpsc.ase.factextractor;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -25,9 +26,8 @@ import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.FactManager.service.ProjectService;
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
-import ca.ucalgary.cpsc.ase.factextractor.composer.QueryGeneratorTest;
+import ca.ucalgary.cpsc.ase.factextractor.evaluation.RunnerVisitor;
 import ca.ucalgary.cpsc.ase.factextractor.indexer.BoundedExecutor;
-import ca.ucalgary.cpsc.ase.factextractor.indexer.Indexer;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
 import ca.ucalgary.cpsc.ase.factextractor.writer.IndexWriter;
@@ -43,10 +43,9 @@ public class Application implements IApplication {
 			System.out.print("Usage: FactExtractor <path>");
 			return IApplication.EXIT_OK;
 		}
-		iterateFileSystem(arguments[0]);		
+//		iterateFileSystem(arguments[0]);		
 //		iterateWorkspace()
-//		QueryGeneratorTest test = new QueryGeneratorTest();
-//		test.testQueryTestFile();
+		evaluate(new File("C:\\Users\\mehrdad\\workspace\\Approximations\\src\\8\\Task08-Original.java"));
 		
 		return IApplication.EXIT_OK;
 	}
@@ -121,6 +120,10 @@ public class Application implements IApplication {
 		} while (unvisited.size() > 0);
 		
 		executor.shutdown();
+	}
+	
+	private void evaluate(File file) {
+		new RunnerVisitor(file);			
 	}
 	
 	private static CompilationUnit parse(ICompilationUnit unit) {

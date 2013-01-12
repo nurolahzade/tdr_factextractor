@@ -4,9 +4,9 @@ import java.io.File;
 
 import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
 
-public class JavaSourceVisitor extends FileSystemVisitor {
+public class RepositoryVisitor extends FileSystemVisitor {
 
-	public JavaSourceVisitor(String path) {
+	public RepositoryVisitor(File path) {
 		super(path);
 	}
 

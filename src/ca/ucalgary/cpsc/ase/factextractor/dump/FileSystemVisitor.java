@@ -6,9 +6,14 @@ public class FileSystemVisitor {
 	
 	protected File base;
 	
-	public FileSystemVisitor(String path) {
-		base = new File(path);
-		walk(base);
+	public FileSystemVisitor(File path) {
+		base = path;
+		if (path.isDirectory()) {
+			walk(path);			
+		}
+		else {
+			visit(path);
+		}
 	}
 
 	protected void walk(File root) {
