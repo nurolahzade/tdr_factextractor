@@ -1,4 +1,4 @@
-package ca.ucalgary.cpsc.ase.factextractor.composer;
+package ca.ucalgary.cpsc.ase.factextractor.evaluation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,24 +15,24 @@ import ca.ucalgary.cpsc.ase.QueryManager.VotingHeuristicManager;
 import ca.ucalgary.cpsc.ase.QueryManager.VotingResult;
 import ca.ucalgary.cpsc.ase.factextractor.composer.QueryGenerator;
 
-public class QueryGeneratorTest {
+public class QueryRunner {
 	
-	private static Logger logger = Logger.getLogger(QueryGeneratorTest.class);
+	private static Logger logger = Logger.getLogger(QueryRunner.class);
 
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.out.println("Usage: QueryGeneratorTest <path>");
 			System.exit(0);
 		}
-		QueryGeneratorTest test = new QueryGeneratorTest();
-		test.runQueryTestFile(new File(args[0]));
+		QueryRunner instance = new QueryRunner();
+		instance.runQueryTestFile(new File(args[0]));
 	}
 	
 	public void runQueryTestFile(File input) {
 		QueryGenerator generator = new QueryGenerator();
 		Query query = generator.generate(input);
 		
-		File output = new File(input.getParent(), input.getName().replaceFirst(".java$", ".txt"));
+		File output = new File(input.getParent(), input.getName().replaceFirst("\\.java$", ".txt"));
 		PrintWriter writer;
 		try {
 			writer = new PrintWriter(output);
