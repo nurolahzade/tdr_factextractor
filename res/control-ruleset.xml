@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<ruleset name="ControlStatementInTest"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+	<rule name="IfStatementInTestRule_JUnit3"
+		language="java"	
+		message="If statement in JUnit 3 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ExtendsList/ClassOrInterfaceType[@Image='TestCase' or @Image='junit.Framework.TestCase']]/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration//IfStatement
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="IfStatementInTestRule_JUnit4"
+		language="java"	
+		message="If statement in JUnit 4 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration[preceding::Annotation/MarkerAnnotation/Name[@Image='Test' or @Image='org.junit.Test']]//IfStatement
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="ForStatementInTestRule_JUnit3"
+		language="java"	
+		message="For statement in test JUnit 3 method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ExtendsList/ClassOrInterfaceType[@Image='TestCase' or @Image='junit.Framework.TestCase']]/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration//ForStatement
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="ForStatementInTestRule_JUnit4"
+		language="java"	
+		message="For statement in JUnit 4 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration[preceding::Annotation/MarkerAnnotation/Name[@Image='Test' or @Image='org.junit.Test']]//ForStatement
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="WhileStatementInTestRule_JUnit3"
+		language="java"	
+		message="While statement in JUnit 3 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ExtendsList/ClassOrInterfaceType[@Image='TestCase' or @Image='junit.Framework.TestCase']]/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration//WhileStatement
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+	
+	<rule name="WhileStatementInTestRule_JUnit4"
+		language="java"	
+		message="While statement in JUnit 4 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration[preceding::Annotation/MarkerAnnotation/Name[@Image='Test' or @Image='org.junit.Test']]//WhileStatement
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+	
+	<rule name="SwitchStatementInTestRule_JUnit3"
+		language="java"	
+		message="Switch statement in JUnit 3 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ExtendsList/ClassOrInterfaceType[@Image='TestCase' or @Image='junit.Framework.TestCase']]/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration//SwitchStatement
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="SwitchStatementInTestRule_JUnit4"
+		language="java"	
+		message="Switch statement in JUnit 4 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration[preceding::Annotation/MarkerAnnotation/Name[@Image='Test' or @Image='org.junit.Test']]//SwitchStatement
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="Junit3CompilationUnit"
+		language="java"	
+		message="A JUnit 3 type definition"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit[child::TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ExtendsList/ClassOrInterfaceType[@Image='TestCase' or @Image='junit.Framework.TestCase']]/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="Junit4CompilationUnit"
+		language="java"	
+		message="A JUnit 4 type definition"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit[child::TypeDeclaration/ClassOrInterfaceDeclaration/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration[preceding::Annotation/MarkerAnnotation/Name[@Image='Test' or @Image='org.junit.Test']]]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+</ruleset>

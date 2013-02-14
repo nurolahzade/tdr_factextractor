@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<ruleset name="NestedControlStatementInTest"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+	<rule name="ControlStatementInIfRule_JUnit3"
+		language="java"	
+		message="Nested control structure in If statement in JUnit 3 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ExtendsList/ClassOrInterfaceType[@Image='TestCase' or @Image='junit.Framework.TestCase']]/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration//IfStatement[descendant::WhileStatement or descendant::ForStatement or descendant::IfStatement or descendant::SwitchStatement]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="ControlStatementInIfRule_JUnit4"
+		language="java"	
+		message="Nsted control structure in If statement in JUnit 4 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration[preceding::Annotation/MarkerAnnotation/Name[@Image='Test' or @Image='org.junit.Test']]//IfStatement[descendant::WhileStatement or descendant::ForStatement or descendant::IfStatement or descendant::SwitchStatement]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="ControlStatementInForRule_JUnit3"
+		language="java"	
+		message="Nested control structure in For statement in JUnit 3 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ExtendsList/ClassOrInterfaceType[@Image='TestCase' or @Image='junit.Framework.TestCase']]/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration//ForStatement[descendant::WhileStatement or descendant::ForStatement or descendant::IfStatement or descendant::SwitchStatement]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="ControlStatementInForRule_JUnit4"
+		language="java"	
+		message="Nsted control structure in For statement in JUnit 4 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration[preceding::Annotation/MarkerAnnotation/Name[@Image='Test' or @Image='org.junit.Test']]//ForStatement[descendant::WhileStatement or descendant::ForStatement or descendant::IfStatement or descendant::SwitchStatement]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="ControlStatementInWhileRule_JUnit3"
+		language="java"	
+		message="Nested control structure in While statement in JUnit 3 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ExtendsList/ClassOrInterfaceType[@Image='TestCase' or @Image='junit.Framework.TestCase']]/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration//WhileStatement[descendant::WhileStatement or descendant::ForStatement or descendant::IfStatement or descendant::SwitchStatement]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="ControlStatementInWhileRule_JUnit4"
+		language="java"	
+		message="Nsted control structure in While statement in JUnit 4 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration[preceding::Annotation/MarkerAnnotation/Name[@Image='Test' or @Image='org.junit.Test']]//WhileStatement[descendant::WhileStatement or descendant::ForStatement or descendant::IfStatement or descendant::SwitchStatement]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="ControlStatementInSwitchRule_JUnit3"
+		language="java"	
+		message="Nested control structure in Switch statement in JUnit 3 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ExtendsList/ClassOrInterfaceType[@Image='TestCase' or @Image='junit.Framework.TestCase']]/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration//SwitchStatement[descendant::WhileStatement or descendant::ForStatement or descendant::IfStatement or descendant::SwitchStatement]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="ControlStatementInSwitchRule_JUnit4"
+		language="java"	
+		message="Nsted control structure in Switch statement in JUnit 4 test method"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration/ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration[preceding::Annotation/MarkerAnnotation/Name[@Image='Test' or @Image='org.junit.Test']]//SwitchStatement[descendant::WhileStatement or descendant::ForStatement or descendant::IfStatement or descendant::SwitchStatement]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+	
+</ruleset>
