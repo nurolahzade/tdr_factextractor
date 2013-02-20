@@ -1,5 +1,6 @@
 package ca.ucalgary.cpsc.ase.factextractor.writer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -11,12 +12,15 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
 import ca.ucalgary.cpsc.ase.FactManager.entity.AssertionType;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
+import ca.ucalgary.cpsc.ase.FactManager.entity.Invocation;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Method;
+import ca.ucalgary.cpsc.ase.FactManager.entity.MethodInvocation;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Position;
 import ca.ucalgary.cpsc.ase.FactManager.entity.TestMethod;
 import ca.ucalgary.cpsc.ase.FactManager.service.AssertionService;
 import ca.ucalgary.cpsc.ase.FactManager.service.ClazzService;
+import ca.ucalgary.cpsc.ase.FactManager.service.MethodInvocationService;
 import ca.ucalgary.cpsc.ase.FactManager.service.MethodService;
 import ca.ucalgary.cpsc.ase.FactManager.service.PositionService;
 import ca.ucalgary.cpsc.ase.FactManager.service.ReferenceService;
@@ -86,14 +90,16 @@ public class IndexWriter extends TestRecorder {
 		String methodName = binding.getName();
 		Clazz returnClazz = loadClazz(binding.getReturnType());
 		boolean isConstructor = binding.isConstructor();
-		int argumentCount = arguments.size();
 		int hash = ASTHelper.hash(arguments);
 		
 		MethodService metthodService = new MethodService();
 		TestMethod testMethod = model.currentTestMethod();
 		Method method = metthodService.createOrGet(methodName, clazz, returnClazz, isConstructor, 
-				argumentCount, hash, testMethod, model.currentAssertion(), getPosition(node));
-		model.stepIntoInvocation(method);
+				getMethodArguments(arguments), hash);
+		MethodInvocationService invocationService = new MethodInvocationService();
+		MethodInvocation invocation = invocationService.create(testMethod, method, 
+				null, getPosition(node));
+		model.stepIntoInvocation(invocation);
 	}
 
 	/*
@@ -140,10 +146,12 @@ public class IndexWriter extends TestRecorder {
 		String name = binding.getName();
 		AssertionType type = AssertionType.getType(name);
 		TestMethod testMethod = model.currentTestMethod();
-		AssertionService service = new AssertionService();
-		Assertion assertion = service.createOrGet(type, testMethod, getPosition(node));
-		model.stepIntoInvocation(assertion);
-		model.stepIntoAssertion(assertion);
+		AssertionService assertionService = new AssertionService();
+		Assertion assertion = assertionService.createOrGet(type);
+		MethodInvocationService invocationService = new MethodInvocationService();
+		MethodInvocation invocation = invocationService.create(testMethod, null, assertion, getPosition(node));
+		model.stepIntoInvocation(invocation);
+//		model.stepIntoAssertion(assertion);
 	}
 
 	@Override
@@ -154,6 +162,18 @@ public class IndexWriter extends TestRecorder {
 	protected Position getPosition(ASTNode node) {
 		PositionService service = new PositionService();
 		return service.create(node.getStartPosition(), node.getLength());
+	}
+
+	public List<Clazz> getMethodArguments(List<Expression> arguments) {
+		List<Clazz> args = new ArrayList<Clazz>();
+		for (Expression argument : arguments) {
+			ITypeBinding binding = argument.resolveTypeBinding();
+//			if (binding != null) {
+				Clazz clazz = loadClazz(binding);
+				args.add(clazz);
+//			}
+		}
+		return args;
 	}
 	
 }

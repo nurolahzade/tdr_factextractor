@@ -1,5 +1,6 @@
 package ca.ucalgary.cpsc.ase.factextractor.writer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -60,21 +61,21 @@ public class QueryWriter extends TestRecorder {
 		method.setName(binding.getName());
 		method.setClazzFqn(binding.getDeclaringClass().getQualifiedName());
 		method.setReturnTypeFqn(binding.getReturnType().getQualifiedName());
-		method.setArguments(arguments.size());
+		method.setArguments(getMethodArguments(arguments));
 		method.setHash(ASTHelper.hash(arguments));
 		method.setConstructor(binding.isConstructor());
 		
 		query.add(method);
 		model.stepIntoInvocation(method);
 		
-		if (model.insideAnAssertion()) {
-			QueryAssertionParameter parameter = new QueryAssertionParameter();
-			
-			parameter.setAssertion(model.currentAssertion());
-			parameter.setMethod(method);
-			
-			query.add(parameter);
-		}
+//		if (model.insideAnAssertion()) {
+//			QueryAssertionParameter parameter = new QueryAssertionParameter();
+//			
+//			parameter.setAssertion(model.currentAssertion());
+//			parameter.setMethod(method);
+//			
+//			query.add(parameter);
+//		}
 	}
 
 	@Override
@@ -109,13 +110,24 @@ public class QueryWriter extends TestRecorder {
 		assertion.setType(AssertionType.getType(binding.getName()));
 		
 		query.add(assertion);
-		model.stepIntoAssertion(assertion);
+//		model.stepIntoAssertion(assertion);
 		model.stepIntoInvocation(assertion);
 	}
 
 	@Override
 	public QueryModel getModel() {
 		return model;
+	}
+
+	public List<String> getMethodArguments(List<Expression> arguments) {
+		List<String> args = new ArrayList<String>();
+		for (Expression argument : arguments) {
+			ITypeBinding binding = argument.resolveTypeBinding();
+//			if (binding != null) {
+				args.add(binding.getQualifiedName());
+//			}
+		}
+		return args;
 	}
 	
 }

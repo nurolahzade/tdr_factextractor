@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
+import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.ASTHelper;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.Model;
@@ -24,7 +25,7 @@ public abstract class TestRecorder {
 	public abstract void saveTestMethod(ASTNode node, IMethodBinding binding);
 	
 	public abstract void saveMethodCall(ASTNode node, IMethodBinding binding, List<Expression> arguments);
-
+	
 	public abstract void saveXception(ITypeBinding binding);
 
 	public abstract void saveXceptions(ITypeBinding[] bindings);
@@ -60,13 +61,13 @@ public abstract class TestRecorder {
 	public boolean visit(ASTNode node, IMethodBinding binding, List<Expression> arguments) {
 		if (binding != null) {
 			if (ASTHelper.isJunitAssertion(binding, getModel())) { // if this is an Assert method call
-				if (getModel().insideAnAssertion()) { // nested assertions are not allowed
-					logger.error("New assertion reached while assertion flag is on.");
-				}
-				else { // legitimate assertion
+//				if (getModel().insideAnAssertion()) { // nested assertions are not allowed
+//					logger.error("New assertion reached while assertion flag is on.");
+//				}
+//				else { // legitimate assertion
 					saveAssertion(node, binding);
 					logger.debug("Assertion in test method.");
-				}
+//				}
 			}
 			else { // this is a non-Assert method call (may or may not have an assertion on it)
 				saveMethodCall(node, binding, arguments);

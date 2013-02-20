@@ -4,6 +4,7 @@ import java.util.Stack;
 
 import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Invocation;
+import ca.ucalgary.cpsc.ase.FactManager.entity.MethodInvocation;
 import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.FactManager.entity.Project;
 import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
@@ -16,14 +17,14 @@ public class SourceModel implements Model {
 	private SourceFile sourceFile;
 	private Stack<Clazz> testClazzStack;
 	private TestMethod testMethod;
-	private Stack<Invocation> invocations;
-	private Assertion assertion;
+	private Stack<MethodInvocation> invocations;
+//	private Assertion assertion;
 	// workaround for PPA's lack of annotations support
 	private boolean jUnit4TestAnnotation;
 	
 	public SourceModel() {
 		testClazzStack = new Stack<Clazz>();
-		invocations = new Stack<Invocation>();
+		invocations = new Stack<MethodInvocation>();
 		jUnit4TestAnnotation = false;
 	}
 	
@@ -63,25 +64,25 @@ public class SourceModel implements Model {
 		this.testMethod = testMethod;
 	}
 	
-	private Invocation popInvocation() {
+	private MethodInvocation popInvocation() {
 		return invocations.pop();
 	}
 	
-	private void pushInvocation(Invocation invocation) {
+	private void pushInvocation(MethodInvocation invocation) {
 		invocations.push(invocation);
 	}
 		
-	private Invocation peekInvocation() {
+	private MethodInvocation peekInvocation() {
 		return invocations.empty() ? null : invocations.peek();
 	}
 
-	private Assertion getAssertion() {
-		return assertion;
-	}
-
-	private void setAssertion(Assertion assertion) {
-		this.assertion = assertion;
-	}
+//	private Assertion getAssertion() {
+//		return assertion;
+//	}
+//
+//	private void setAssertion(Assertion assertion) {
+//		this.assertion = assertion;
+//	}
 	
 	public Project currentProject() {
 		return getProject();
@@ -129,23 +130,23 @@ public class SourceModel implements Model {
 		return getTestMethod();
 	}
 	
-	public void stepIntoAssertion(Assertion assertion) {
-		setAssertion(assertion);
-	}
+//	public void stepIntoAssertion(Assertion assertion) {
+//		setAssertion(assertion);
+//	}
+//	
+//	public void stepOutOfAssertion() {
+//		stepIntoAssertion(null);
+//	}
 	
-	public void stepOutOfAssertion() {
-		stepIntoAssertion(null);
-	}
+//	public Assertion currentAssertion() {
+//		return getAssertion();
+//	}
 	
-	public Assertion currentAssertion() {
-		return getAssertion();
-	}
-	
-	public Invocation currentInvocation() {
+	public MethodInvocation currentInvocation() {
 		return peekInvocation();
 	}
 	
-	public void stepIntoInvocation(Invocation invocation) {
+	public void stepIntoInvocation(MethodInvocation invocation) {
 		pushInvocation(invocation);
 	}
 	
@@ -182,10 +183,10 @@ public class SourceModel implements Model {
 		return currentTestMethod() != null;
 	}
 
-	@Override
-	public boolean insideAnAssertion() {
-		return currentInvocation() instanceof Assertion;
-	}
+//	@Override
+//	public boolean insideAnAssertion() {
+//		return currentInvocation().getAssertion() != null;
+//	}
 
 	@Override
 	public void importsJUnit4TestAnnotation() {

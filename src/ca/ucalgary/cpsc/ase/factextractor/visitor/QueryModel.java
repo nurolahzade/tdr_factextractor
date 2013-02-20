@@ -13,7 +13,7 @@ public class QueryModel implements Model {
 	private Stack<QueryTestClass> testClassStack;
 	private QueryTestMethod testMethod;
 	private Stack<QueryInvocation> invocations;
-	private QueryAssertion assertion;
+//	private QueryAssertion assertion;
 	// workaround for PPA's lack of annotations support
 	private boolean jUnit4TestAnnotation;
 	
@@ -55,13 +55,13 @@ public class QueryModel implements Model {
 		return invocations.empty() ? null : invocations.peek();
 	}
 
-	private QueryAssertion getAssertion() {
-		return assertion;
-	}
-
-	private void setAssertion(QueryAssertion assertion) {
-		this.assertion = assertion;
-	}
+//	private QueryAssertion getAssertion() {
+//		return assertion;
+//	}
+//
+//	private void setAssertion(QueryAssertion assertion) {
+//		this.assertion = assertion;
+//	}
 	
 	public void stepIntoClazz(QueryTestClass clazz) {
 		pushTestClazz(clazz);
@@ -91,17 +91,17 @@ public class QueryModel implements Model {
 		return getTestMethod();
 	}
 	
-	public void stepIntoAssertion(QueryAssertion assertion) {
-		setAssertion(assertion);
-	}
+//	public void stepIntoAssertion(QueryAssertion assertion) {
+//		setAssertion(assertion);
+//	}
 	
-	public void stepOutOfAssertion() {
-		stepIntoAssertion(null);
-	}
+//	public void stepOutOfAssertion() {
+//		stepIntoAssertion(null);
+//	}
 	
-	public QueryAssertion currentAssertion() {
-		return getAssertion();
-	}
+//	public QueryAssertion currentAssertion() {
+//		return getAssertion();
+//	}
 	
 	public QueryInvocation currentInvocation() {
 		return peekInvocation();
@@ -144,11 +144,11 @@ public class QueryModel implements Model {
 		return currentTestMethod() != null;
 	}
 
-	@Override
-	public boolean insideAnAssertion() {
-//		return currentInvocation() instanceof QueryAssertion;	
-		return currentAssertion() != null;
-	}
+//	@Override
+//	public boolean insideAnAssertion() {
+////		return currentInvocation() instanceof QueryAssertion;	
+//		return currentAssertion() != null;
+//	}
 
 	@Override
 	public void importsJUnit4TestAnnotation() {

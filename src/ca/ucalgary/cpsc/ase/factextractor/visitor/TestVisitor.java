@@ -184,9 +184,9 @@ public class TestVisitor extends ASTVisitor {
 
 	@Override
 	public void endVisit(MethodInvocation node) {
-		if (model.insideAnAssertion()) { // turn off the assertion flag
-			model.stepOutOfAssertion();			
-		}
+//		if (model.insideAnAssertion()) { // turn off the assertion flag
+//			model.stepOutOfAssertion();			
+//		}
 		model.stepOutOfInvocation();
 		super.endVisit(node);
 	}		
@@ -219,7 +219,7 @@ public class TestVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		try {
-			if (model.insideAnAssertion()) { // if inside a JUnit test method
+			if (model.insideATestMethod()) { // if inside a JUnit test method
 				IMethodBinding binding = node.resolveConstructorBinding();
 				if (binding != null) {
 					List<Expression> arguments = node.arguments();				

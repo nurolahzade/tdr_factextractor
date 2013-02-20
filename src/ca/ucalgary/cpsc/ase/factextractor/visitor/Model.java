@@ -14,7 +14,7 @@ public interface Model {
 	public boolean insideATestMethod();
 	public void ignoreInvocation();
 	public void stepOutOfInvocation();
-	public boolean insideAnAssertion();
-	public void stepOutOfAssertion();	
+//	public boolean insideAnAssertion();
+//	public void stepOutOfAssertion();	
 	
 }
