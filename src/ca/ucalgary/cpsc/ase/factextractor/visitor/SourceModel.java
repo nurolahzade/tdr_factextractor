@@ -2,14 +2,14 @@ package ca.ucalgary.cpsc.ase.factextractor.visitor;
 
 import java.util.Stack;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Invocation;
-import ca.ucalgary.cpsc.ase.FactManager.entity.MethodInvocation;
-import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Project;
-import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
-import ca.ucalgary.cpsc.ase.FactManager.entity.TestMethod;
+import ca.ucalgary.cpsc.ase.common.entity.Assertion;
+import ca.ucalgary.cpsc.ase.common.entity.Invocation;
+import ca.ucalgary.cpsc.ase.common.entity.MethodInvocation;
+import ca.ucalgary.cpsc.ase.common.entity.ObjectType;
+import ca.ucalgary.cpsc.ase.common.entity.Project;
+import ca.ucalgary.cpsc.ase.common.entity.SourceFile;
+import ca.ucalgary.cpsc.ase.common.entity.Clazz;
+import ca.ucalgary.cpsc.ase.common.entity.TestMethod;
 
 public class SourceModel implements Model {
 	

@@ -4,13 +4,13 @@ import java.io.File;
 
 public class DumpFilter {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		if (args.length != 1) {
 			System.out.println("Usage: DumpIndexer <path>");
 			System.exit(0);
 		}
 		
-		new RepositoryVisitor(new File(args[0]));
+		new RepositoryVisitor(new File(args[0])).start();
 	}	
 
 }

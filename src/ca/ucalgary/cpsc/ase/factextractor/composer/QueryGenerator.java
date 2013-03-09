@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import ca.mcgill.cs.swevo.ppa.PPAOptions;
 import ca.mcgill.cs.swevo.ppa.util.PPACoreSingleton;
 import ca.mcgill.cs.swevo.ppa.util.PPACoreUtil;
-import ca.ucalgary.cpsc.ase.QueryManager.Query;
+import ca.ucalgary.cpsc.ase.common.query.Query;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.QueryModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
 import ca.ucalgary.cpsc.ase.factextractor.writer.QueryWriter;

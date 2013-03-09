@@ -8,12 +8,15 @@ public class FileSystemVisitor {
 	
 	public FileSystemVisitor(File path) {
 		base = path;
-		if (path.isDirectory()) {
-			walk(path);			
+	}
+	
+	public void start() {
+		if (base.isDirectory()) {
+			walk(base);			
 		}
 		else {
-			visit(path);
-		}
+			visit(base);
+		}		
 	}
 
 	protected void walk(File root) {
@@ -37,7 +40,6 @@ public class FileSystemVisitor {
 	}
 	
 	protected boolean visitDirectory(File file) {
-		// do nothing
 		return true;
 	}
 }

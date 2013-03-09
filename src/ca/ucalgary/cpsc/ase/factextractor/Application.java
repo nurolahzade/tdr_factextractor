@@ -20,12 +20,12 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.Project;
-import ca.ucalgary.cpsc.ase.FactManager.entity.RepositoryFile;
-import ca.ucalgary.cpsc.ase.FactManager.entity.SourceFile;
-import ca.ucalgary.cpsc.ase.FactManager.service.ProjectService;
-import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
-import ca.ucalgary.cpsc.ase.FactManager.service.SourceFileService;
+import ca.ucalgary.cpsc.ase.common.entity.Project;
+import ca.ucalgary.cpsc.ase.common.entity.RepositoryFile;
+import ca.ucalgary.cpsc.ase.common.entity.SourceFile;
+import ca.ucalgary.cpsc.ase.common.service.ProjectServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.RepositoryFileServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.SourceFileServiceRemote;
 import ca.ucalgary.cpsc.ase.factextractor.evaluation.RunnerVisitor;
 import ca.ucalgary.cpsc.ase.factextractor.indexer.BoundedExecutor;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
@@ -43,14 +43,14 @@ public class Application implements IApplication {
 			System.out.print("Usage: FactExtractor <path>");
 			return IApplication.EXIT_OK;
 		}
-//		iterateFileSystem(arguments[0]);		
+		iterateFileSystem(arguments[0]);		
 //		iterateWorkspace()
-		evaluate(new File("C:\\Users\\mehrdad\\workspace\\Approximations\\src\\8\\Task08-Original.java"));
+//		evaluate(new File("C:\\Users\\mehrdad\\workspace\\Approximations\\src\\8\\Task08-Original.java"));
 		
 		return IApplication.EXIT_OK;
 	}
 	
-	private void iterateWorkspace() {
+	private void iterateWorkspace() throws Exception {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		// Get all projects in the workspace
@@ -64,11 +64,12 @@ public class Application implements IApplication {
 				if (project.isNatureEnabled("org.eclipse.jdt.core.javanature")) {
 					String projectName = project.getDescription().getName();
 					String projectVersion = null;
-					ProjectService projectService = new ProjectService();
+					ProjectServiceRemote projectService = ServiceProxy.getProjectService();
 					Project prj = projectService.create(projectName, projectVersion);
 					model.stepIntoProject(prj);
 					logger.debug("Project: " + projectName);
 					
+					SourceFileServiceRemote sourceService = ServiceProxy.getSourceFileService();
 					IPackageFragment[] packages = JavaCore.create(project)
 							.getPackageFragments();
 					// parse(JavaCore.create(project));
@@ -76,7 +77,6 @@ public class Application implements IApplication {
 						if (mypackage.getKind() == IPackageFragmentRoot.K_SOURCE) {
 							for (ICompilationUnit unit : mypackage
 									.getCompilationUnits()) {
-								SourceFileService sourceService = new SourceFileService();
 								String path = unit.getPath().toString();
 								SourceFile source = sourceService.create(model.currentProject(), path);
 								model.stepIntoSourceFile(source);
@@ -97,14 +97,14 @@ public class Application implements IApplication {
 		}		
 	}
 	
-	private void iterateFileSystem(String path) {
+	private void iterateFileSystem(String path) throws Exception {
 		BoundedExecutor executor = new BoundedExecutor(path, 24);
 				
-		RepositoryFileService repositoryService = new RepositoryFileService();
+		RepositoryFileServiceRemote repositoryService = ServiceProxy.getRepositoryFileService();
 		List<RepositoryFile> unvisited;
 		
 		do {
-			unvisited = repositoryService.findUnvisited();
+			unvisited = repositoryService.findUnvisited(100);
 			for (RepositoryFile file : unvisited) {
 				try {
 					if (!executor.isRunning(file.getId())) {
@@ -123,7 +123,7 @@ public class Application implements IApplication {
 	}
 	
 	private void evaluate(File file) {
-		new RunnerVisitor(file);			
+		new RunnerVisitor(file).start();			
 	}
 	
 	private static CompilationUnit parse(ICompilationUnit unit) {

@@ -9,8 +9,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
-import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
+import ca.ucalgary.cpsc.ase.common.entity.Clazz;
+import ca.ucalgary.cpsc.ase.common.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.ASTHelper;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.Model;
 

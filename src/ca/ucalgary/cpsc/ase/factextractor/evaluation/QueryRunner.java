@@ -7,10 +7,10 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
+import ca.ucalgary.cpsc.ase.common.entity.Clazz;
 import ca.ucalgary.cpsc.ase.FactManager.service.ClazzService;
 import ca.ucalgary.cpsc.ase.QueryManager.Heuristic;
-import ca.ucalgary.cpsc.ase.QueryManager.Query;
+import ca.ucalgary.cpsc.ase.common.query.Query;
 import ca.ucalgary.cpsc.ase.QueryManager.VotingHeuristicManager;
 import ca.ucalgary.cpsc.ase.QueryManager.VotingResult;
 import ca.ucalgary.cpsc.ase.factextractor.composer.QueryGenerator;

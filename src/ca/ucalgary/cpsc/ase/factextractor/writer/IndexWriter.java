@@ -9,32 +9,48 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.Assertion;
-import ca.ucalgary.cpsc.ase.FactManager.entity.AssertionType;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Clazz;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Invocation;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Method;
-import ca.ucalgary.cpsc.ase.FactManager.entity.MethodInvocation;
-import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
-import ca.ucalgary.cpsc.ase.FactManager.entity.Position;
-import ca.ucalgary.cpsc.ase.FactManager.entity.TestMethod;
-import ca.ucalgary.cpsc.ase.FactManager.service.AssertionService;
-import ca.ucalgary.cpsc.ase.FactManager.service.ClazzService;
-import ca.ucalgary.cpsc.ase.FactManager.service.MethodInvocationService;
-import ca.ucalgary.cpsc.ase.FactManager.service.MethodService;
-import ca.ucalgary.cpsc.ase.FactManager.service.PositionService;
-import ca.ucalgary.cpsc.ase.FactManager.service.ReferenceService;
-import ca.ucalgary.cpsc.ase.FactManager.service.TestMethodService;
-import ca.ucalgary.cpsc.ase.FactManager.service.XceptionService;
+import ca.ucalgary.cpsc.ase.common.entity.Assertion;
+import ca.ucalgary.cpsc.ase.common.entity.AssertionType;
+import ca.ucalgary.cpsc.ase.common.entity.Clazz;
+import ca.ucalgary.cpsc.ase.common.entity.Method;
+import ca.ucalgary.cpsc.ase.common.entity.MethodInvocation;
+import ca.ucalgary.cpsc.ase.common.entity.ObjectType;
+import ca.ucalgary.cpsc.ase.common.entity.Position;
+import ca.ucalgary.cpsc.ase.common.entity.TestMethod;
+import ca.ucalgary.cpsc.ase.common.service.AssertionServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.ClazzServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.MethodInvocationServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.MethodServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.PositionServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.ReferenceServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.TestMethodServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.XceptionServiceRemote;
+import ca.ucalgary.cpsc.ase.factextractor.ServiceProxy;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.ASTHelper;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 
 public class IndexWriter extends TestRecorder {
 	
 	protected SourceModel model;
+	protected ClazzServiceRemote clazzService;
+	protected TestMethodServiceRemote testMethodService;
+	protected MethodServiceRemote methodService;
+	protected MethodInvocationServiceRemote invocationService;
+	protected XceptionServiceRemote xceptionService;
+	protected ReferenceServiceRemote referenceService;
+	protected AssertionServiceRemote assertionService;
+	protected PositionServiceRemote positionService;
 	
-	public IndexWriter(SourceModel model) {
+	public IndexWriter(SourceModel model) throws Exception {
 		this.model = model;
+		this.clazzService = ServiceProxy.getClazzService();
+		this.testMethodService = ServiceProxy.getTestMethodService();
+		this.methodService = ServiceProxy.getMethodService();
+		this.invocationService = ServiceProxy.getMethodInvocationService();
+		this.xceptionService = ServiceProxy.getXceptionService();
+		this.referenceService = ServiceProxy.getReferenceService();
+		this.assertionService = ServiceProxy.getAssertionService();
+		this.positionService = ServiceProxy.getPositionService();
 	}
 	
 	private static Logger logger = Logger.getLogger(IndexWriter.class);	
@@ -48,9 +64,7 @@ public class IndexWriter extends TestRecorder {
 		String packageName = binding.getPackage().getName();
 		String className = binding.getName();
 		String fqn = binding.getQualifiedName();		
-		ClazzService clazzService = new ClazzService();
 		Clazz testClazz = clazzService.createOrGet(className, packageName, fqn, model.currentSourceFile(), type);
-//		logPositionAndLength(node);
 		model.stepIntoClazz(testClazz);
 	}
 	
@@ -64,7 +78,6 @@ public class IndexWriter extends TestRecorder {
 		String className = binding.getName();
 		String packageName = ASTHelper.getPackageName(binding);
 		String fqn = binding.getQualifiedName();
-		ClazzService clazzService = new ClazzService();
 		return clazzService.createOrGet(className, packageName, fqn, null, ASTHelper.getObjectType(binding));
 	}
 	
@@ -73,7 +86,6 @@ public class IndexWriter extends TestRecorder {
 	 */
 	@Override
 	public void saveTestMethod(ASTNode node, IMethodBinding binding) {
-		TestMethodService testMethodService = new TestMethodService();
 		TestMethod method = testMethodService.create(binding.getName(), model.currentClazz(), getPosition(node));
 		ITypeBinding[] exceptions = binding.getExceptionTypes();
 		model.stepIntoTestMethod(method);
@@ -92,11 +104,9 @@ public class IndexWriter extends TestRecorder {
 		boolean isConstructor = binding.isConstructor();
 		int hash = ASTHelper.hash(arguments);
 		
-		MethodService metthodService = new MethodService();
 		TestMethod testMethod = model.currentTestMethod();
-		Method method = metthodService.createOrGet(methodName, clazz, returnClazz, isConstructor, 
+		Method method = methodService.createOrGet(methodName, clazz, returnClazz, isConstructor, 
 				getMethodArguments(arguments), hash);
-		MethodInvocationService invocationService = new MethodInvocationService();
 		MethodInvocation invocation = invocationService.create(testMethod, method, 
 				null, getPosition(node));
 		model.stepIntoInvocation(invocation);
@@ -108,9 +118,8 @@ public class IndexWriter extends TestRecorder {
 	@Override
 	public void saveXception(ITypeBinding binding) {
 		Clazz clazz = loadClazz(binding);		
-		XceptionService service = new XceptionService();
 		TestMethod testMethod = model.currentTestMethod();
-		service.createOrGet(clazz, testMethod);
+		xceptionService.createOrGet(clazz, testMethod);
 	}
 
 	/*
@@ -134,8 +143,7 @@ public class IndexWriter extends TestRecorder {
 		if (declaringClass != null) {
 			declaringClazz = loadClazz(declaringClass);			
 		}
-		ReferenceService service = new ReferenceService();
-		service.createOrGet(name, clazz, declaringClazz, model.currentTestMethod(), getPosition(node));
+		referenceService.createOrGet(name, clazz, declaringClazz, model.currentTestMethod(), getPosition(node));
 	}
 
 	/*
@@ -146,9 +154,7 @@ public class IndexWriter extends TestRecorder {
 		String name = binding.getName();
 		AssertionType type = AssertionType.getType(name);
 		TestMethod testMethod = model.currentTestMethod();
-		AssertionService assertionService = new AssertionService();
 		Assertion assertion = assertionService.createOrGet(type);
-		MethodInvocationService invocationService = new MethodInvocationService();
 		MethodInvocation invocation = invocationService.create(testMethod, null, assertion, getPosition(node));
 		model.stepIntoInvocation(invocation);
 //		model.stepIntoAssertion(assertion);
@@ -160,8 +166,7 @@ public class IndexWriter extends TestRecorder {
 	}
 	
 	protected Position getPosition(ASTNode node) {
-		PositionService service = new PositionService();
-		return service.create(node.getStartPosition(), node.getLength());
+		return positionService.create(node.getStartPosition(), node.getLength());
 	}
 
 	public List<Clazz> getMethodArguments(List<Expression> arguments) {

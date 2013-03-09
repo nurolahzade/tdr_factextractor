@@ -10,21 +10,28 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 import ca.mcgill.cs.swevo.ppa.util.PPACoreSingleton;
-import ca.ucalgary.cpsc.ase.FactManager.entity.RepositoryFile;
-import ca.ucalgary.cpsc.ase.FactManager.service.RepositoryFileService;
+import ca.ucalgary.cpsc.ase.common.entity.RepositoryFile;
+import ca.ucalgary.cpsc.ase.common.entity.SourceFile;
+import ca.ucalgary.cpsc.ase.factextractor.ServiceProxy;
+import ca.ucalgary.cpsc.ase.common.service.RepositoryFileServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.SourceFileServiceRemote;
 
 public class BoundedExecutor {
     private final ExecutorService pool;
     private String root;
     private final Semaphore semaphore;
     private ThreadPoolMonitor poolMonitor;
+    private RepositoryFileServiceRemote repositoryService;
+    private SourceFileServiceRemote sourceService;
     
 	private static Logger logger = Logger.getLogger(BoundedExecutor.class);
     
-    public BoundedExecutor(String path, int bound) {
+    public BoundedExecutor(String path, int bound) throws Exception {
 		this.root = path;
     	this.pool = Executors.newFixedThreadPool(bound);
         this.semaphore = new Semaphore(bound);
+    	this.repositoryService = ServiceProxy.getRepositoryFileService();
+    	this.sourceService = ServiceProxy.getSourceFileService();
         initPPAEngine(bound);
         initThreadPoolMonitor();
     }
@@ -50,9 +57,9 @@ public class BoundedExecutor {
         try {
         	final Future<?> future = pool.submit(new Runnable() {
                 public void run() {
-                	RepositoryFileService repositoryService = new RepositoryFileService();
                     try {
-                    	new Indexer(root, file).run();
+                    	SourceFile source = sourceService.create(null, file.getPath());
+                    	new Indexer(source, root + file.getPath()).run();
                     	repositoryService.visit(file);
                     	logger.debug("Indexed: " + file.getPath());
                     } catch (Throwable t) {

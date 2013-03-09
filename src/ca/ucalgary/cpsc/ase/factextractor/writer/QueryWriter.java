@@ -8,16 +8,16 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import ca.ucalgary.cpsc.ase.FactManager.entity.AssertionType;
-import ca.ucalgary.cpsc.ase.FactManager.entity.ObjectType;
-import ca.ucalgary.cpsc.ase.QueryManager.Query;
-import ca.ucalgary.cpsc.ase.QueryManager.query.QueryAssertion;
-import ca.ucalgary.cpsc.ase.QueryManager.query.QueryAssertionParameter;
-import ca.ucalgary.cpsc.ase.QueryManager.query.QueryException;
-import ca.ucalgary.cpsc.ase.QueryManager.query.QueryMethod;
-import ca.ucalgary.cpsc.ase.QueryManager.query.QueryReference;
-import ca.ucalgary.cpsc.ase.QueryManager.query.QueryTestClass;
-import ca.ucalgary.cpsc.ase.QueryManager.query.QueryTestMethod;
+import ca.ucalgary.cpsc.ase.common.entity.AssertionType;
+import ca.ucalgary.cpsc.ase.common.entity.ObjectType;
+import ca.ucalgary.cpsc.ase.common.query.QueryAssertion;
+import ca.ucalgary.cpsc.ase.common.query.QueryAssertionParameter;
+import ca.ucalgary.cpsc.ase.common.query.QueryException;
+import ca.ucalgary.cpsc.ase.common.query.QueryMethod;
+import ca.ucalgary.cpsc.ase.common.query.QueryReference;
+import ca.ucalgary.cpsc.ase.common.query.QueryTestClass;
+import ca.ucalgary.cpsc.ase.common.query.QueryTestMethod;
+import ca.ucalgary.cpsc.ase.common.query.Query;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.ASTHelper;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.QueryModel;
 
