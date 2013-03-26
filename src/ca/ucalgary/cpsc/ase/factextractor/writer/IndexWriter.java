@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import ca.ucalgary.cpsc.ase.common.ServiceProxy;
 import ca.ucalgary.cpsc.ase.common.entity.Assertion;
 import ca.ucalgary.cpsc.ase.common.entity.AssertionType;
 import ca.ucalgary.cpsc.ase.common.entity.Clazz;
@@ -23,34 +24,35 @@ import ca.ucalgary.cpsc.ase.common.service.MethodInvocationServiceRemote;
 import ca.ucalgary.cpsc.ase.common.service.MethodServiceRemote;
 import ca.ucalgary.cpsc.ase.common.service.PositionServiceRemote;
 import ca.ucalgary.cpsc.ase.common.service.ReferenceServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.ServiceWrapperRemote;
 import ca.ucalgary.cpsc.ase.common.service.TestMethodServiceRemote;
 import ca.ucalgary.cpsc.ase.common.service.XceptionServiceRemote;
-import ca.ucalgary.cpsc.ase.factextractor.ServiceProxy;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.ASTHelper;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 
 public class IndexWriter extends TestRecorder {
 	
 	protected SourceModel model;
-	protected ClazzServiceRemote clazzService;
-	protected TestMethodServiceRemote testMethodService;
-	protected MethodServiceRemote methodService;
-	protected MethodInvocationServiceRemote invocationService;
-	protected XceptionServiceRemote xceptionService;
-	protected ReferenceServiceRemote referenceService;
-	protected AssertionServiceRemote assertionService;
-	protected PositionServiceRemote positionService;
+	
+	private ClazzServiceRemote clazzService;
+	private TestMethodServiceRemote testMethodService;
+	private MethodServiceRemote methodService;
+	private MethodInvocationServiceRemote invocationService;
+	private ReferenceServiceRemote referenceService;
+	private XceptionServiceRemote xceptionService;
+	private AssertionServiceRemote assertionService;
+	private PositionServiceRemote positionService;
 	
 	public IndexWriter(SourceModel model) throws Exception {
 		this.model = model;
-		this.clazzService = ServiceProxy.getClazzService();
-		this.testMethodService = ServiceProxy.getTestMethodService();
-		this.methodService = ServiceProxy.getMethodService();
-		this.invocationService = ServiceProxy.getMethodInvocationService();
-		this.xceptionService = ServiceProxy.getXceptionService();
-		this.referenceService = ServiceProxy.getReferenceService();
-		this.assertionService = ServiceProxy.getAssertionService();
-		this.positionService = ServiceProxy.getPositionService();
+		clazzService = ServiceProxy.getClazzService();
+		testMethodService = ServiceProxy.getTestMethodService();
+		methodService = ServiceProxy.getMethodService();
+		invocationService = ServiceProxy.getMethodInvocationService();
+		referenceService = ServiceProxy.getReferenceService();
+		xceptionService = ServiceProxy.getXceptionService();
+		assertionService = ServiceProxy.getAssertionService();
+		positionService = ServiceProxy.getPositionService();
 	}
 	
 	private static Logger logger = Logger.getLogger(IndexWriter.class);	
@@ -109,6 +111,16 @@ public class IndexWriter extends TestRecorder {
 				getMethodArguments(arguments), hash);
 		MethodInvocation invocation = invocationService.create(testMethod, method, 
 				null, getPosition(node));
+		
+		if (model.insideAnInvocation()) {
+			MethodInvocation receiver = model.currentInvocation();
+			invocationService.addDataFlowRelationship(invocation, receiver);
+		}
+		else if (model.insideAnAssignment()) {
+			String to = model.currentLHS();
+			model.registerDataFlow(invocation, to);
+		}
+		
 		model.stepIntoInvocation(invocation);
 	}
 
@@ -180,5 +192,14 @@ public class IndexWriter extends TestRecorder {
 		}
 		return args;
 	}
-	
+
+	@Override
+	protected void checkForPossibleDataFlows(String variable) {
+		MethodInvocation origin = model.dataFlowsInto(variable);
+		if (origin != null) {
+			MethodInvocation receiver = model.currentInvocation();
+			invocationService.addDataFlowRelationship(origin, receiver);			
+		}
+	}
+
 }

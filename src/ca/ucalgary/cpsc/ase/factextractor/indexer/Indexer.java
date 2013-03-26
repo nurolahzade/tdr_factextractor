@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import ca.mcgill.cs.swevo.ppa.PPAOptions;
 import ca.mcgill.cs.swevo.ppa.util.PPACoreUtil;
 import ca.ucalgary.cpsc.ase.common.entity.SourceFile;
+import ca.ucalgary.cpsc.ase.common.service.ServiceWrapperRemote;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.VisitorException;
@@ -15,7 +16,7 @@ import ca.ucalgary.cpsc.ase.factextractor.writer.IndexWriter;
 public class Indexer {
 	
 	protected String path;
-	protected SourceFile source;	
+	protected SourceFile source;
 
 	public Indexer(SourceFile source, String path) {
 		this.path = path;

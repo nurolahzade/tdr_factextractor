@@ -1,9 +1,9 @@
 package ca.ucalgary.cpsc.ase.factextractor.visitor;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
-import ca.ucalgary.cpsc.ase.common.entity.Assertion;
-import ca.ucalgary.cpsc.ase.common.entity.Invocation;
 import ca.ucalgary.cpsc.ase.common.entity.MethodInvocation;
 import ca.ucalgary.cpsc.ase.common.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.common.entity.Project;
@@ -21,11 +21,15 @@ public class SourceModel implements Model {
 //	private Assertion assertion;
 	// workaround for PPA's lack of annotations support
 	private boolean jUnit4TestAnnotation;
+	private String lhs;
+	private Map<String, MethodInvocation> dataFlows;
 	
 	public SourceModel() {
 		testClazzStack = new Stack<Clazz>();
 		invocations = new Stack<MethodInvocation>();
 		jUnit4TestAnnotation = false;
+		lhs = null;
+		dataFlows = new HashMap<String, MethodInvocation>();
 	}
 	
 	private Project getProject() {
@@ -124,8 +128,13 @@ public class SourceModel implements Model {
 	
 	public void stepOutOfTestMethod() {
 		setTestMethod(null);
+		resetDataFlows();
 	}
 	
+	private void resetDataFlows() {
+		dataFlows.clear();
+	}
+
 	public TestMethod currentTestMethod() {
 		return getTestMethod();
 	}
@@ -196,6 +205,38 @@ public class SourceModel implements Model {
 	@Override
 	public boolean hasTestAnnotation() {
 		return jUnit4TestAnnotation;
+	}
+
+	@Override
+	public boolean insideAnInvocation() {
+		return currentInvocation() != null;
+	}
+
+	@Override
+	public void stepIntoAssignment(String assignee) {
+		lhs = assignee;		
+	}
+
+	@Override
+	public void stepOutOfAssignment() {
+		lhs = null;
+	}
+
+	@Override
+	public boolean insideAnAssignment() {
+		return lhs != null;
+	}
+	
+	public String currentLHS() {
+		return lhs;
+	}
+	
+	public void registerDataFlow(MethodInvocation from, String to) {
+		dataFlows.put(to, from);
+	}
+	
+	public MethodInvocation dataFlowsInto(String variable) {
+		return dataFlows.get(variable);
 	}
 	
 }

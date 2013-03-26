@@ -14,7 +14,11 @@ public interface Model {
 	public boolean insideATestMethod();
 	public void ignoreInvocation();
 	public void stepOutOfInvocation();
+	public boolean insideAnInvocation();
 //	public boolean insideAnAssertion();
-//	public void stepOutOfAssertion();	
+//	public void stepOutOfAssertion();
+	public void stepIntoAssignment(String assignee);
+	public void stepOutOfAssignment();
+	public boolean insideAnAssignment();
 	
 }

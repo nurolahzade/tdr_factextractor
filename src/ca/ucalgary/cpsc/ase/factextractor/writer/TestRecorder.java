@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import ca.ucalgary.cpsc.ase.common.entity.Clazz;
+import ca.ucalgary.cpsc.ase.common.entity.MethodInvocation;
 import ca.ucalgary.cpsc.ase.common.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.ASTHelper;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.Model;
@@ -34,11 +35,18 @@ public abstract class TestRecorder {
 	
 	public abstract void saveAssertion(ASTNode node, IMethodBinding binding);	
 	
+	protected abstract void checkForPossibleDataFlows(String variable);
+
 	public boolean visit(ASTNode node, IVariableBinding binding, boolean isField) {
 		if (binding != null) {
 			ITypeBinding referenceType = binding.getType(); 
 			ITypeBinding declaringClass = binding.getDeclaringClass();
 			String referenceName = binding.getName();
+
+			if (getModel().insideAnInvocation()) {
+				checkForPossibleDataFlows(referenceName);
+			}
+			
 			if (declaringClass != null || referenceType.isPrimitive() || referenceType.isArray()) { // if is a primitive or array, or a property of a known class
 				//TODO add assertion on field access tracking
 				saveReference(node, referenceName, referenceType, declaringClass);

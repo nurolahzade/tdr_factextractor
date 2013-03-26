@@ -1,9 +1,10 @@
 package ca.ucalgary.cpsc.ase.factextractor.visitor;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import ca.ucalgary.cpsc.ase.common.entity.ObjectType;
-import ca.ucalgary.cpsc.ase.common.query.QueryAssertion;
 import ca.ucalgary.cpsc.ase.common.query.QueryInvocation;
 import ca.ucalgary.cpsc.ase.common.query.QueryTestClass;
 import ca.ucalgary.cpsc.ase.common.query.QueryTestMethod;
@@ -16,11 +17,15 @@ public class QueryModel implements Model {
 //	private QueryAssertion assertion;
 	// workaround for PPA's lack of annotations support
 	private boolean jUnit4TestAnnotation;
+	private String lhs;
+	private Map<String, QueryInvocation> dataFlows;
 	
 	public QueryModel() {
 		testClassStack = new Stack<QueryTestClass>();
 		invocations = new Stack<QueryInvocation>();
 		jUnit4TestAnnotation = false;
+		lhs = null;
+		dataFlows = new HashMap<String, QueryInvocation>();
 	}
 	
 	private QueryTestClass popTestClass() {
@@ -158,6 +163,38 @@ public class QueryModel implements Model {
 	@Override
 	public boolean hasTestAnnotation() {
 		return jUnit4TestAnnotation;
+	}
+
+	@Override
+	public boolean insideAnInvocation() {
+		return currentInvocation() != null;
+	}
+
+	@Override
+	public void stepIntoAssignment(String assignee) {
+		lhs = assignee;		
+	}
+
+	@Override
+	public void stepOutOfAssignment() {
+		lhs = null;
+	}
+
+	@Override
+	public boolean insideAnAssignment() {
+		return lhs != null;		
+	}
+
+	public String currentLHS() {
+		return lhs;
+	}
+	
+	public void registerDataFlow(QueryInvocation from, String to) {
+		dataFlows.put(to, from);
+	}
+	
+	public QueryInvocation dataFlowsInto(String variable) {
+		return dataFlows.get(variable);
 	}
 	
 }

@@ -10,9 +10,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 import ca.mcgill.cs.swevo.ppa.util.PPACoreSingleton;
+import ca.ucalgary.cpsc.ase.common.ServiceProxy;
 import ca.ucalgary.cpsc.ase.common.entity.RepositoryFile;
 import ca.ucalgary.cpsc.ase.common.entity.SourceFile;
-import ca.ucalgary.cpsc.ase.factextractor.ServiceProxy;
+import ca.ucalgary.cpsc.ase.common.service.ServiceWrapperRemote;
 import ca.ucalgary.cpsc.ase.common.service.RepositoryFileServiceRemote;
 import ca.ucalgary.cpsc.ase.common.service.SourceFileServiceRemote;
 
@@ -21,8 +22,8 @@ public class BoundedExecutor {
     private String root;
     private final Semaphore semaphore;
     private ThreadPoolMonitor poolMonitor;
-    private RepositoryFileServiceRemote repositoryService;
     private SourceFileServiceRemote sourceService;
+    private RepositoryFileServiceRemote repositoryService;
     
 	private static Logger logger = Logger.getLogger(BoundedExecutor.class);
     
@@ -30,8 +31,8 @@ public class BoundedExecutor {
 		this.root = path;
     	this.pool = Executors.newFixedThreadPool(bound);
         this.semaphore = new Semaphore(bound);
-    	this.repositoryService = ServiceProxy.getRepositoryFileService();
-    	this.sourceService = ServiceProxy.getSourceFileService();
+        this.sourceService = ServiceProxy.getSourceFileService();
+        this.repositoryService = ServiceProxy.getRepositoryFileService();
         initPPAEngine(bound);
         initThreadPoolMonitor();
     }

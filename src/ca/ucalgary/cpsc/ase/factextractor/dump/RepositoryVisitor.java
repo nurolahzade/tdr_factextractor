@@ -2,8 +2,8 @@ package ca.ucalgary.cpsc.ase.factextractor.dump;
 
 import java.io.File;
 
+import ca.ucalgary.cpsc.ase.common.ServiceProxy;
 import ca.ucalgary.cpsc.ase.common.service.RepositoryFileServiceRemote;
-import ca.ucalgary.cpsc.ase.factextractor.ServiceProxy;
 
 public class RepositoryVisitor extends FileSystemVisitor {
 

@@ -3,16 +3,16 @@ package ca.ucalgary.cpsc.ase.factextractor.visitor;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -92,7 +92,7 @@ public class TestVisitor extends ASTVisitor {
 				logger.debug("Ignoring interface definition: " + node.getName().getFullyQualifiedName());				
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return false;
 	}
@@ -142,7 +142,7 @@ public class TestVisitor extends ASTVisitor {
 				}
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return isTestMethod && super.visit(node);
 	}		
@@ -177,7 +177,7 @@ public class TestVisitor extends ASTVisitor {
 				return false;
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}		
@@ -205,7 +205,7 @@ public class TestVisitor extends ASTVisitor {
 				return false;
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}
@@ -239,7 +239,7 @@ public class TestVisitor extends ASTVisitor {
 				return false;
 			}			
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}
@@ -263,7 +263,7 @@ public class TestVisitor extends ASTVisitor {
 				logger.debug("Field access outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}
@@ -281,7 +281,7 @@ public class TestVisitor extends ASTVisitor {
 				logger.debug("Field access outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}	
@@ -299,7 +299,7 @@ public class TestVisitor extends ASTVisitor {
 				}
 				else { // cannot resolve simple name, ignore it
 					logger.warn("SimpleName node binding was not resolved: " + node.getFullyQualifiedName());
-					return false;
+					return false;	
 				}				
 			}
 			else { // simple name was accessed outside a test method, ignore it
@@ -308,7 +308,7 @@ public class TestVisitor extends ASTVisitor {
 				logger.debug("Variable access outside test method was ignored: " + node.getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		
 		return super.visit(node);
@@ -336,7 +336,7 @@ public class TestVisitor extends ASTVisitor {
 				logger.debug("Qualified name access outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		
 		return super.visit(node);
@@ -346,6 +346,9 @@ public class TestVisitor extends ASTVisitor {
 	public boolean visit(VariableDeclarationFragment node) {
 		try {
 			if (model.insideATestMethod()) { // if inside a test method
+				String identifier = node.getName().getIdentifier();
+				model.stepIntoAssignment(identifier);
+
 				IVariableBinding binding = node.resolveBinding();
 				String variableName = node.getName().getFullyQualifiedName();
 				if (binding != null) {
@@ -364,11 +367,36 @@ public class TestVisitor extends ASTVisitor {
 				logger.debug("Variable declaration fragment outside test method was ignored: " + node.getName().getFullyQualifiedName());
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());						
+			logger.warn(t.getMessage(), t);						
 		}
 		return super.visit(node);
 	}
-		
+
+	@Override
+	public void endVisit(VariableDeclarationFragment node) {
+		model.stepOutOfAssignment();
+		super.endVisit(node);
+	}
+	
+	@Override
+	public boolean visit(Assignment node) {
+		try {
+			if (node.getLeftHandSide().getNodeType() == ASTNode.SIMPLE_NAME) {
+				String identifier = ((SimpleName) node.getLeftHandSide()).getIdentifier();
+				model.stepIntoAssignment(identifier);
+			}
+		} catch (Throwable t) {
+			logger.warn(t.getMessage(), t);
+		}
+		return super.visit(node);
+	}
+
+	@Override
+	public void endVisit(Assignment node) {
+		model.stepOutOfAssignment();
+		super.endVisit(node);
+	}
+
 	@Override
 	public boolean visit(CatchClause node) {
 		try {
@@ -387,7 +415,7 @@ public class TestVisitor extends ASTVisitor {
 				logger.debug("Catch clause outside test method was ignored.");
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());			
+			logger.warn(t.getMessage(), t);			
 		}
 		return super.visit(node);
 	}
@@ -410,7 +438,7 @@ public class TestVisitor extends ASTVisitor {
 				logger.debug("Throw statement outisde test method was ignored.");
 			}
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}
@@ -422,7 +450,7 @@ public class TestVisitor extends ASTVisitor {
 			//TODO - save boolean literal (for the sake of importing into the Solr index)
 			logger.debug("Literal: " + literal);
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}
@@ -434,7 +462,7 @@ public class TestVisitor extends ASTVisitor {
 			//TODO - save character literal (for the sake of importing into the Solr index)
 			logger.debug("Literal: " + literal);
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}
@@ -445,7 +473,7 @@ public class TestVisitor extends ASTVisitor {
 			//TODO - save NULL literal (for the sake of importing into the Solr index)
 			logger.debug("Literal: null");
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}
@@ -457,7 +485,7 @@ public class TestVisitor extends ASTVisitor {
 			//TODO - save numeric literal (for the sake of importing into the Solr index)
 			logger.debug("Literal: " + literal);
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}
@@ -469,11 +497,9 @@ public class TestVisitor extends ASTVisitor {
 			//TODO - save string literal (for the sake of importing into the Solr index)
 			logger.debug("Literal: " + literal);
 		} catch (Throwable t) {
-			logger.warn(t.getMessage());
+			logger.warn(t.getMessage(), t);
 		}
 		return super.visit(node);
 	}
-
-	
 	
 }

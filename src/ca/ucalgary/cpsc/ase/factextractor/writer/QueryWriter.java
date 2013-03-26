@@ -13,6 +13,7 @@ import ca.ucalgary.cpsc.ase.common.entity.ObjectType;
 import ca.ucalgary.cpsc.ase.common.query.QueryAssertion;
 import ca.ucalgary.cpsc.ase.common.query.QueryAssertionParameter;
 import ca.ucalgary.cpsc.ase.common.query.QueryException;
+import ca.ucalgary.cpsc.ase.common.query.QueryInvocation;
 import ca.ucalgary.cpsc.ase.common.query.QueryMethod;
 import ca.ucalgary.cpsc.ase.common.query.QueryReference;
 import ca.ucalgary.cpsc.ase.common.query.QueryTestClass;
@@ -66,6 +67,16 @@ public class QueryWriter extends TestRecorder {
 		method.setConstructor(binding.isConstructor());
 		
 		query.add(method);
+		
+		if (model.insideAnInvocation()) {
+			QueryInvocation receiver = model.currentInvocation();
+			query.addDataFlow(method, receiver);
+		}
+		else if (model.insideAnAssignment()) {
+			String to = model.currentLHS();
+			model.registerDataFlow(method, to);
+		}
+		
 		model.stepIntoInvocation(method);
 		
 //		if (model.insideAnAssertion()) {
@@ -128,6 +139,15 @@ public class QueryWriter extends TestRecorder {
 //			}
 		}
 		return args;
+	}
+
+	@Override
+	protected void checkForPossibleDataFlows(String variable) {
+		QueryMethod origin = (QueryMethod) model.dataFlowsInto(variable);
+		if (origin != null) {
+			QueryInvocation receiver = model.currentInvocation();
+			query.addDataFlow(origin, receiver);
+		}
 	}
 	
 }

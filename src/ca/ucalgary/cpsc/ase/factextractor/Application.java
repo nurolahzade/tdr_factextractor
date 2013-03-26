@@ -20,12 +20,12 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import ca.ucalgary.cpsc.ase.common.ServiceProxy;
 import ca.ucalgary.cpsc.ase.common.entity.Project;
 import ca.ucalgary.cpsc.ase.common.entity.RepositoryFile;
 import ca.ucalgary.cpsc.ase.common.entity.SourceFile;
-import ca.ucalgary.cpsc.ase.common.service.ProjectServiceRemote;
 import ca.ucalgary.cpsc.ase.common.service.RepositoryFileServiceRemote;
-import ca.ucalgary.cpsc.ase.common.service.SourceFileServiceRemote;
+import ca.ucalgary.cpsc.ase.common.service.ServiceWrapperRemote;
 import ca.ucalgary.cpsc.ase.factextractor.evaluation.RunnerVisitor;
 import ca.ucalgary.cpsc.ase.factextractor.indexer.BoundedExecutor;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
@@ -56,6 +56,7 @@ public class Application implements IApplication {
 		// Get all projects in the workspace
 		IProject[] projects = root.getProjects();
 		
+		ServiceWrapperRemote serviceWrapper = ServiceProxy.getServiceWrapper();
 		SourceModel model = new SourceModel();
 		
 		// Loop over all projects
@@ -63,13 +64,10 @@ public class Application implements IApplication {
 			try {
 				if (project.isNatureEnabled("org.eclipse.jdt.core.javanature")) {
 					String projectName = project.getDescription().getName();
-					String projectVersion = null;
-					ProjectServiceRemote projectService = ServiceProxy.getProjectService();
-					Project prj = projectService.create(projectName, projectVersion);
+					Project prj = serviceWrapper.createProject(projectName);
 					model.stepIntoProject(prj);
 					logger.debug("Project: " + projectName);
 					
-					SourceFileServiceRemote sourceService = ServiceProxy.getSourceFileService();
 					IPackageFragment[] packages = JavaCore.create(project)
 							.getPackageFragments();
 					// parse(JavaCore.create(project));
@@ -78,7 +76,7 @@ public class Application implements IApplication {
 							for (ICompilationUnit unit : mypackage
 									.getCompilationUnits()) {
 								String path = unit.getPath().toString();
-								SourceFile source = sourceService.create(model.currentProject(), path);
+								SourceFile source = serviceWrapper.createSourceFile(model.currentProject(), path);
 								model.stepIntoSourceFile(source);
 								logger.debug("File: " + path);
 								
@@ -98,7 +96,7 @@ public class Application implements IApplication {
 	}
 	
 	private void iterateFileSystem(String path) throws Exception {
-		BoundedExecutor executor = new BoundedExecutor(path, 24);
+		BoundedExecutor executor = new BoundedExecutor(path, 1);
 				
 		RepositoryFileServiceRemote repositoryService = ServiceProxy.getRepositoryFileService();
 		List<RepositoryFile> unvisited;
