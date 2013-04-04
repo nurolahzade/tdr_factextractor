@@ -338,6 +338,7 @@ Bundle-ClassPath: .,
  jboss-lib/xml-resolver.jar,
  jboss-lib/XmlSchema.jar,
  jboss-lib/xmlsec.jar,
- jboss-lib/xnio-api.jar
+ jboss-lib/xnio-api.jar,
+ lib/dom4j-1.6.1.jar
 Export-Package: ca.ucalgary.cpsc.ase.factextractor.composer
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

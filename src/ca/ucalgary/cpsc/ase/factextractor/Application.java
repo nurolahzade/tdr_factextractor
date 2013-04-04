@@ -26,6 +26,7 @@ import ca.ucalgary.cpsc.ase.common.entity.RepositoryFile;
 import ca.ucalgary.cpsc.ase.common.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.common.service.RepositoryFileServiceRemote;
 import ca.ucalgary.cpsc.ase.common.service.ServiceWrapperRemote;
+import ca.ucalgary.cpsc.ase.factextractor.evaluation.ExperimentRunner;
 import ca.ucalgary.cpsc.ase.factextractor.evaluation.RunnerVisitor;
 import ca.ucalgary.cpsc.ase.factextractor.indexer.BoundedExecutor;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
@@ -43,9 +44,10 @@ public class Application implements IApplication {
 			System.out.print("Usage: FactExtractor <path>");
 			return IApplication.EXIT_OK;
 		}
-		iterateFileSystem(arguments[0]);		
+//		iterateFileSystem(arguments[0]);		
 //		iterateWorkspace()
-//		evaluate(new File("C:\\Users\\mehrdad\\workspace\\Approximations\\src\\8\\Task08-Original.java"));
+		evaluate(new File("C:\\Users\\mehrdad\\workspace\\Approximations\\src\\eval-config.xml"));
+//		evaluate(new File("C:\\Users\\mehrdad\\workspace\\Approximations\\src"));
 		
 		return IApplication.EXIT_OK;
 	}
@@ -96,7 +98,7 @@ public class Application implements IApplication {
 	}
 	
 	private void iterateFileSystem(String path) throws Exception {
-		BoundedExecutor executor = new BoundedExecutor(path, 1);
+		BoundedExecutor executor = new BoundedExecutor(path, 2);
 				
 		RepositoryFileServiceRemote repositoryService = ServiceProxy.getRepositoryFileService();
 		List<RepositoryFile> unvisited;
@@ -120,8 +122,9 @@ public class Application implements IApplication {
 		executor.shutdown();
 	}
 	
-	private void evaluate(File file) {
-		new RunnerVisitor(file).start();			
+	private void evaluate(File file) throws Exception {
+//		new RunnerVisitor(file).start();
+		new ExperimentRunner(file);
 	}
 	
 	private static CompilationUnit parse(ICompilationUnit unit) {

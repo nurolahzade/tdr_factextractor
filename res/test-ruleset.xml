@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<ruleset name="JunitTest"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+	<rule name="JUnit3"
+		language="java"	
+		message="JUnit 3 test class"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ExtendsList/ClassOrInterfaceType[@Image='TestCase' or @Image='junit.Framework.TestCase']]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+	<rule name="JUnit4"
+		language="java"	
+		message="JUnit 4 test class"
+		class="net.sourceforge.pmd.lang.rule.XPathRule">
+		<description>  
+		</description>
+		<properties>
+			<property name="xpath">
+				<value>
+					<![CDATA[
+						//CompilationUnit/TypeDeclaration/ClassOrInterfaceDeclaration[descendant::ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/MethodDeclaration[preceding::Annotation/MarkerAnnotation/Name[@Image='Test' or @Image='org.junit.Test']]]
+					]]>
+				</value>
+			</property>
+		</properties>
+	</rule>
+
+</ruleset>

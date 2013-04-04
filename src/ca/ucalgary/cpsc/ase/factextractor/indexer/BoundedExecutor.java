@@ -42,7 +42,7 @@ public class BoundedExecutor {
     }
     
     private void initThreadPoolMonitor() {
-        poolMonitor = new ThreadPoolMonitor(3 * 60, TimeUnit.SECONDS);
+        poolMonitor = new ThreadPoolMonitor(5 * 60, TimeUnit.SECONDS);
         poolMonitor.start();    	
     }
 

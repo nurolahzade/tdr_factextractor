@@ -334,5 +334,6 @@
 	<classpathentry kind="lib" path="jboss-lib/XmlSchema.jar"/>
 	<classpathentry kind="lib" path="jboss-lib/xmlsec.jar"/>
 	<classpathentry kind="lib" path="jboss-lib/xnio-api.jar"/>
+	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
