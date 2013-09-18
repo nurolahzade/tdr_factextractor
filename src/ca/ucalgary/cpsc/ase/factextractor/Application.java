@@ -26,8 +26,9 @@ import ca.ucalgary.cpsc.ase.common.entity.RepositoryFile;
 import ca.ucalgary.cpsc.ase.common.entity.SourceFile;
 import ca.ucalgary.cpsc.ase.common.service.RepositoryFileServiceRemote;
 import ca.ucalgary.cpsc.ase.common.service.ServiceWrapperRemote;
-import ca.ucalgary.cpsc.ase.factextractor.evaluation.ExperimentRunner;
+import ca.ucalgary.cpsc.ase.factextractor.evaluation.ApproximationExperimentRunner;
 import ca.ucalgary.cpsc.ase.factextractor.evaluation.RunnerVisitor;
+import ca.ucalgary.cpsc.ase.factextractor.evaluation.SubsetExperimentRunner;
 import ca.ucalgary.cpsc.ase.factextractor.indexer.BoundedExecutor;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.SourceModel;
 import ca.ucalgary.cpsc.ase.factextractor.visitor.TestVisitor;
@@ -40,13 +41,14 @@ public class Application implements IApplication {
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		String[] arguments = (String[]) context.getArguments().get("application.args");
-		if (arguments.length != 1) {
-			System.out.print("Usage: FactExtractor <path>");
-			return IApplication.EXIT_OK;
-		}
+//		if (arguments.length != 1) {
+//			System.out.print("Usage: FactExtractor <path>");
+//			return IApplication.EXIT_OK;
+//		}
 //		iterateFileSystem(arguments[0]);		
-//		iterateWorkspace()
-		evaluate(new File("C:\\Users\\mehrdad\\workspace\\Approximations\\src\\eval-config.xml"));
+//		iterateWorkspace();
+		evaluate(new File("/home/mehrdad/workspace2/approx/src/subset-config.xml"));
+//		evaluate(new File("/home/mehrdad/workspace2/approx/src/eval-config.xml"));
 //		evaluate(new File("C:\\Users\\mehrdad\\workspace\\Approximations\\src"));
 		
 		return IApplication.EXIT_OK;
@@ -124,7 +126,8 @@ public class Application implements IApplication {
 	
 	private void evaluate(File file) throws Exception {
 //		new RunnerVisitor(file).start();
-		new ExperimentRunner(file);
+//		new ApproximationExperimentRunner(file);
+		new SubsetExperimentRunner(file);
 	}
 	
 	private static CompilationUnit parse(ICompilationUnit unit) {
