@@ -47,9 +47,9 @@ public class Application implements IApplication {
 //		}
 //		iterateFileSystem(arguments[0]);		
 //		iterateWorkspace();
-		evaluate(new File("/home/mehrdad/workspace2/approx/src/subset-config.xml"));
+		evaluate(new File("/home/mehrdad/workspace2/approx/src/simulate-config.xml"));
 //		evaluate(new File("/home/mehrdad/workspace2/approx/src/eval-config.xml"));
-//		evaluate(new File("C:\\Users\\mehrdad\\workspace\\Approximations\\src"));
+//		evaluate(new File("/home/mehrdad/workspace2/approx/src"));
 		
 		return IApplication.EXIT_OK;
 	}
